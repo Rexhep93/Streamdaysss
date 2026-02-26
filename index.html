@@ -434,6 +434,88 @@ body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border
 .top10-loading { font-size:13px; color:var(--t3); padding:20px 0; text-align:center; }
 .top10-updated { font-size:11px; color:var(--t3); text-align:right; margin-top:10px; }
 
+/* ── Slogan ── */
+.slogan {
+  font-size:12px; color:var(--t3); margin:-10px 0 14px 0;
+  letter-spacing:0.01em; font-weight:400;
+}
+
+/* ── Live Sport ── */
+.livesport-section {
+  margin-top:18px; padding:16px 12px 18px;
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(17,17,26,0.96),rgba(8,8,14,0.98));
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow:0 16px 35px rgba(0,0,0,0.75);
+  animation:fadeUp .35s ease forwards; opacity:0; transform:translateY(8px);
+}
+body[data-theme="light"] .livesport-section {
+  background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(240,240,248,0.98));
+  border-color: rgba(0,0,0,0.06); box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.livesport-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.livesport-title  { font-size:15px; font-weight:700; }
+.livesport-live-dot {
+  width:8px; height:8px; border-radius:999px; background:#ff3b30;
+  box-shadow:0 0 0 3px rgba(255,59,48,0.25);
+  animation: livepulse 1.6s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes livepulse {
+  0%,100% { box-shadow:0 0 0 3px rgba(255,59,48,0.25); }
+  50%      { box-shadow:0 0 0 6px rgba(255,59,48,0.08); }
+}
+.livesport-sub { font-size:12px; color:var(--t3); margin-bottom:12px; }
+.livesport-tab-row { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.livesport-tab {
+  padding:5px 12px; border-radius:999px; font-size:11px; font-weight:500;
+  border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
+  color:var(--t2); cursor:pointer; font-family:inherit; transition:all .15s ease;
+}
+.livesport-tab.active {
+  border-color:rgba(255,59,48,0.6);
+  background:rgba(255,59,48,0.15);
+  color:#ff6b6b;
+}
+body[data-theme="light"] .livesport-tab { border-color:rgba(0,0,0,0.1); background:rgba(0,0,0,0.03); color:var(--t2); }
+body[data-theme="light"] .livesport-tab.active { background:rgba(255,59,48,0.08); border-color:rgba(255,59,48,0.4); color:#cc2200; }
+.livesport-list  { display:flex; flex-direction:column; gap:10px; }
+.sport-event {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 8px; border-radius:14px;
+  border:1px solid rgba(255,255,255,0.05);
+  background:rgba(255,255,255,0.02);
+  transition:background .16s ease;
+}
+.sport-event:hover { background:rgba(255,255,255,0.05); }
+body[data-theme="light"] .sport-event { border-color:rgba(0,0,0,0.06); background:rgba(0,0,0,0.02); }
+body[data-theme="light"] .sport-event:hover { background:rgba(0,0,0,0.04); }
+.sport-event.is-live {
+  border-color:rgba(255,59,48,0.3);
+  background:rgba(255,59,48,0.06);
+}
+.sport-icon {
+  width:42px; height:42px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; background:rgba(255,255,255,0.05);
+}
+.sport-info { flex:1; min-width:0; }
+.sport-title { font-size:13px; font-weight:600; line-height:1.25; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sport-meta  { font-size:11px; color:var(--t3); }
+.sport-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.sport-time  { font-size:12px; font-weight:600; color:var(--t2); white-space:nowrap; }
+.sport-streamer {
+  font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;
+  white-space:nowrap;
+}
+.sport-live-badge {
+  font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;
+  background:rgba(255,59,48,0.9); color:#fff; letter-spacing:0.04em;
+}
+.livesport-empty { font-size:13px; color:var(--t3); padding:20px 0; text-align:center; }
+.livesport-updated { font-size:11px; color:var(--t3); text-align:right; margin-top:10px; }
+.livesport-disclaimer { font-size:11px; color:var(--t3); margin-top:8px; line-height:1.5; padding:8px; border-radius:8px; background:rgba(255,255,255,0.03); }
+
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -467,12 +549,14 @@ body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border
       <button class="theme-btn" id="toggleTheme" onclick="toggleTheme()" aria-label="Wissel thema" title="Thema: licht/donker">Licht</button>
     </div>
   </header>
+  <div class="slogan">Alles wat verschijnt op streaming — op één plek.</div>
 
   <div class="pill-row" role="group" aria-label="Type filter">
-    <button class="pill active" data-f="all"    onclick="setType(this)">Alles</button>
-    <button class="pill"        data-f="movie"  onclick="setType(this)">Films</button>
-    <button class="pill"        data-f="tv"     onclick="setType(this)">Series</button>
-    <button class="pill"        data-f="top10"  onclick="setType(this)">Top 10</button>
+    <button class="pill active" data-f="all"       onclick="setType(this)">Alles</button>
+    <button class="pill"        data-f="movie"     onclick="setType(this)">Films</button>
+    <button class="pill"        data-f="tv"        onclick="setType(this)">Series</button>
+    <button class="pill"        data-f="top10"     onclick="setType(this)">Top 10</button>
+    <button class="pill"        data-f="livesport" onclick="setType(this)">Live Sport</button>
   </div>
 
   <div id="svcBar" class="svc-bar"></div>
@@ -518,33 +602,33 @@ const OMDB_KEY   = ''; // Optioneel: voeg je eigen gratis OMDB API key toe via o
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 const WANTED_PROVIDERS = [
-  { match: 'netflix',       name: 'Netflix',        color: '#E50914', text: '#fff' },
-  { match: 'prime video',   name: 'Prime Video',    color: '#00A8E0', text: '#fff' },
-  { match: 'amazon prime',  name: 'Prime Video',    color: '#00A8E0', text: '#fff' },
-  { match: 'disney plus',   name: 'Disney+',        color: '#113CCF', text: '#fff' },
-  { match: 'disney+',       name: 'Disney+',        color: '#113CCF', text: '#fff' },
-  { match: 'apple tv plus', name: 'Apple TV+',      color: '#555555', text: '#fff' },
-  { match: 'apple tv+',     name: 'Apple TV+',      color: '#555555', text: '#fff' },
-  { match: 'apple tv',      name: 'Apple TV+',      color: '#555555', text: '#fff' },
-  { match: 'max ',          name: 'Max',            color: '#5822B4', text: '#fff' },
-  { match: 'hbo max',       name: 'Max',            color: '#5822B4', text: '#fff' },
-  { match: 'skyshowtime',   name: 'SkyShowtime',    color: '#003E7E', text: '#fff' },
-  { match: 'videoland',     name: 'Videoland',      color: '#CC0000', text: '#fff' },
-  { match: 'path',          name: 'Pathé Thuis',    color: '#FF6B00', text: '#fff' },
-  { match: 'npo',           name: 'NPO Start',      color: '#FF6600', text: '#fff' },
-  { match: 'paramount',     name: 'Paramount+',     color: '#0064FF', text: '#fff' },
-  { match: 'discovery',     name: 'Discovery+',     color: '#0036A0', text: '#fff' },
-  { match: 'viaplay',       name: 'Viaplay',        color: '#1F1646', text: '#fff' },
-  { match: 'canal',         name: 'Canal+',         color: '#000000', text: '#fff' },
-  { match: 'mubi',          name: 'MUBI',           color: '#00B4B4', text: '#fff' },
-  { match: 'cinemember',    name: 'CineMember',     color: '#E8003D', text: '#fff' },
-  { match: 'film1',         name: 'Film1',          color: '#D10000', text: '#fff' },
+  { match: 'netflix',       key: 'netflix',     name: 'Netflix',        color: '#E50914', text: '#fff' },
+  { match: 'prime video',   key: 'prime video', name: 'Prime Video',    color: '#00A8E0', text: '#fff' },
+  { match: 'amazon prime',  key: 'prime video', name: 'Prime Video',    color: '#00A8E0', text: '#fff' },
+  { match: 'disney plus',   key: 'disney+',     name: 'Disney+',        color: '#113CCF', text: '#fff' },
+  { match: 'disney+',       key: 'disney+',     name: 'Disney+',        color: '#113CCF', text: '#fff' },
+  { match: 'apple tv plus', key: 'apple tv+',   name: 'Apple TV+',      color: '#555555', text: '#fff' },
+  { match: 'apple tv+',     key: 'apple tv+',   name: 'Apple TV+',      color: '#555555', text: '#fff' },
+  { match: 'apple tv',      key: 'apple tv+',   name: 'Apple TV+',      color: '#555555', text: '#fff' },
+  { match: 'max ',          key: 'max',         name: 'Max',            color: '#5822B4', text: '#fff' },
+  { match: 'hbo max',       key: 'max',         name: 'Max',            color: '#5822B4', text: '#fff' },
+  { match: 'skyshowtime',   key: 'skyshowtime', name: 'SkyShowtime',    color: '#003E7E', text: '#fff' },
+  { match: 'videoland',     key: 'videoland',   name: 'Videoland',      color: '#CC0000', text: '#fff' },
+  { match: 'path',          key: 'pathe',       name: 'Pathé Thuis',    color: '#FF6B00', text: '#fff' },
+  { match: 'npo',           key: 'npo',         name: 'NPO Start',      color: '#FF6600', text: '#fff' },
+  { match: 'paramount',     key: 'paramount',   name: 'Paramount+',     color: '#0064FF', text: '#fff' },
+  { match: 'discovery',     key: 'discovery',   name: 'Discovery+',     color: '#0036A0', text: '#fff' },
+  { match: 'viaplay',       key: 'viaplay',     name: 'Viaplay',        color: '#1F1646', text: '#fff' },
+  { match: 'canal',         key: 'canal',       name: 'Canal+',         color: '#000000', text: '#fff' },
+  { match: 'mubi',          key: 'mubi',        name: 'MUBI',           color: '#00B4B4', text: '#fff' },
+  { match: 'cinemember',    key: 'cinemember',  name: 'CineMember',     color: '#E8003D', text: '#fff' },
+  { match: 'film1',         key: 'film1',       name: 'Film1',          color: '#D10000', text: '#fff' },
 ];
 
 const POPULAR_KEYS = [
-  'netflix','prime video','hbo max','max ','disney plus','disney+',
-  'videoland','apple tv plus','apple tv+','skyshowtime','viaplay',
-  'path','npo','paramount','mubi','cinemember','film1','canal',
+  'netflix','prime video','max','disney+','videoland',
+  'apple tv+','skyshowtime','viaplay','pathe','npo',
+  'paramount','discovery','mubi','cinemember','film1','canal',
 ];
 
 let TMDB_NL_PROVIDERS = {};
@@ -560,7 +644,7 @@ function getSvcStyle(name = '') {
 }
 function providerKey(name) {
   const p = matchProvider(name);
-  return p ? p.match : (name || '').toLowerCase().replace(/netherlands/gi,'').replace(/\s+/g,' ').trim();
+  return p ? p.key : (name || '').toLowerCase().replace(/netherlands/gi,'').replace(/\s+/g,' ').trim();
 }
 function isNLStreaming(name) { return !!matchProvider(name); }
 function detectOrigin(svcName) {
@@ -1265,17 +1349,279 @@ function setType(el) {
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
 
-  const svcBar  = document.getElementById('svcBar');
-  const navBar  = document.getElementById('navBar');
+  const svcBar = document.getElementById('svcBar');
+  const navBar = document.getElementById('navBar');
 
   if (typeFilter === 'top10') {
     svcBar.style.display = 'none';
     navBar.style.display = 'none';
     renderTop10();
+  } else if (typeFilter === 'livesport') {
+    svcBar.style.display = 'none';
+    navBar.style.display = 'none';
+    renderLiveSport();
   } else {
     svcBar.style.display = '';
     buildDayList(); renderAll();
   }
+}
+
+// ── Live Sport ────────────────────────────────────────────────────────────────
+// Bekende NL streaming platforms voor sport + hun kleuren
+const SPORT_STREAMERS = {
+  'Viaplay':       { color: '#1F1646', bg: 'rgba(31,22,70,0.85)' },
+  'Ziggo Sport':   { color: '#FF6B00', bg: 'rgba(255,107,0,0.85)' },
+  'ESPN':          { color: '#CC0000', bg: 'rgba(204,0,0,0.85)' },
+  'Discovery+':    { color: '#0036A0', bg: 'rgba(0,54,160,0.85)' },
+  'DAZN':          { color: '#F5D908', bg: 'rgba(245,217,8,0.85)', textColor:'#000' },
+  'NPO Start':     { color: '#FF6600', bg: 'rgba(255,102,0,0.85)' },
+  'Max':           { color: '#5822B4', bg: 'rgba(88,34,180,0.85)' },
+  'Canal+':        { color: '#333333', bg: 'rgba(50,50,50,0.85)' },
+  'Prime Video':   { color: '#00A8E0', bg: 'rgba(0,168,224,0.85)' },
+};
+
+const SPORT_ICONS = {
+  'Voetbal': '⚽', 'Football': '⚽', 'Soccer': '⚽',
+  'Tennis': '🎾', 'Formule 1': '🏎️', 'F1': '🏎️',
+  'Basketbal': '🏀', 'Basketball': '🏀',
+  'Wielrennen': '🚴', 'Cycling': '🚴',
+  'Rugby': '🏉', 'Hockey': '🏒', 'Golf': '⛳',
+  'Darts': '🎯', 'Boksen': '🥊', 'Boxing': '🥊',
+  'MMA': '🥋', 'Atletiek': '🏃', 'Zwemmen': '🏊',
+  'Snooker': '🎱', 'default': '🏆',
+};
+
+let sportFilter = 'all'; // 'all' | 'live' | 'today' | 'week'
+let sportCache = null;
+
+// Genereer aankomende sport evenementen via TheSportsDB + TMDB sport content
+async function fetchSportEvents() {
+  if (sportCache) return sportCache;
+
+  const events = [];
+  const now = new Date();
+
+  // ── TheSportsDB: gratis API voor echte sport schedules ──────────────────────
+  // Major leagues relevant voor NL kijkers
+  const leagues = [
+    { id: '4335', name: 'Eredivisie',     sport: 'Voetbal',   streamer: 'ESPN',        icon: '⚽' },
+    { id: '4480', name: 'Champions League', sport: 'Voetbal', streamer: 'Viaplay',     icon: '⚽' },
+    { id: '4328', name: 'Premier League', sport: 'Voetbal',   streamer: 'Viaplay',     icon: '⚽' },
+    { id: '4480', name: 'Europa League',  sport: 'Voetbal',   streamer: 'Viaplay',     icon: '⚽' },
+    { id: '4443', name: 'La Liga',        sport: 'Voetbal',   streamer: 'Viaplay',     icon: '⚽' },
+    { id: '4331', name: 'Bundesliga',     sport: 'Voetbal',   streamer: 'DAZN',        icon: '⚽' },
+    { id: '4334', name: 'Ligue 1',        sport: 'Voetbal',   streamer: 'Canal+',      icon: '⚽' },
+  ];
+
+  // Fetch next events per league
+  const leagueFetches = leagues.slice(0, 5).map(async (league) => {
+    const cKey = `sportsdb_next_${league.id}`;
+    let data = scGet(cKey);
+    if (!data) {
+      try {
+        const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${league.id}`);
+        if (r.ok) { data = await r.json(); scSet(cKey, data); }
+      } catch {}
+    }
+    if (!data?.events) return;
+    (data.events || []).slice(0, 4).forEach(ev => {
+      const dateStr = ev.dateEvent || '';
+      const timeStr = ev.strTime ? ev.strTime.slice(0,5) : '';
+      const eventDate = dateStr ? new Date(dateStr + (timeStr ? 'T' + timeStr : 'T00:00:00')) : null;
+      if (!eventDate) return;
+      events.push({
+        id: `sdb-${ev.idEvent}`,
+        title: ev.strEvent || `${ev.strHomeTeam} – ${ev.strAwayTeam}`,
+        subtitle: `${league.name}`,
+        sport: league.sport,
+        icon: league.icon,
+        streamer: league.streamer,
+        date: eventDate,
+        thumb: ev.strThumb || ev.strBanner || null,
+        venue: ev.strVenue || '',
+        isLive: false,
+      });
+    });
+  });
+
+  // Also fetch live events today
+  const todayStr = now.toISOString().slice(0,10);
+  const liveFetch = async () => {
+    const cKey = `sportsdb_live`;
+    let data = scGet(cKey);
+    if (!data) {
+      try {
+        const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/liveevents.php`);
+        if (r.ok) { data = await r.json(); scSet(cKey, data); }
+      } catch {}
+    }
+    (data?.events || []).forEach(ev => {
+      const streamerMatch = ['Viaplay','Ziggo Sport','ESPN','DAZN','Discovery+','Canal+'].find(s =>
+        (ev.strTVStation || '').includes(s)
+      ) || 'Viaplay';
+      events.push({
+        id: `live-${ev.idEvent}`,
+        title: ev.strEvent || ev.strHomeTeam + ' – ' + ev.strAwayTeam,
+        subtitle: ev.strLeague || ev.strSport,
+        sport: ev.strSport || 'Sport',
+        icon: SPORT_ICONS[ev.strSport] || '🏆',
+        streamer: streamerMatch,
+        date: new Date(),
+        thumb: ev.strThumb || null,
+        venue: ev.strVenue || '',
+        isLive: true,
+      });
+    });
+  };
+
+  await Promise.all([...leagueFetches, liveFetch()]).catch(() => {});
+
+  // ── Aanvulling: Formule 1 seizoen via Ergast (gratis, geen key) ────────────
+  const f1Fetch = async () => {
+    const cKey = 'f1_races_2025';
+    let data = scGet(cKey);
+    if (!data) {
+      try {
+        const r = await fetch('https://ergast.com/api/f1/2025.json');
+        if (r.ok) { data = await r.json(); scSet(cKey, data); }
+      } catch {}
+    }
+    const races = data?.MRData?.RaceTable?.Races || [];
+    races.forEach(race => {
+      const raceDate = new Date(race.date + 'T' + (race.time || '14:00:00'));
+      if (raceDate < new Date(now.getTime() - 86400000)) return; // skip past races
+      events.push({
+        id: `f1-${race.round}`,
+        title: `🏎️ ${race.raceName}`,
+        subtitle: `Formule 1 · ${race.Circuit?.circuitName || ''}`,
+        sport: 'Formule 1',
+        icon: '🏎️',
+        streamer: 'Viaplay',
+        date: raceDate,
+        thumb: null,
+        venue: race.Circuit?.Location?.country || '',
+        isLive: false,
+      });
+    });
+  };
+  await f1Fetch().catch(() => {});
+
+  // Sorteer: live eerst, dan op datum
+  events.sort((a, b) => {
+    if (a.isLive && !b.isLive) return -1;
+    if (!a.isLive && b.isLive) return 1;
+    return a.date - b.date;
+  });
+
+  // Haal max 60 events op, max 60 dagen vooruit
+  const cutoff = new Date(now.getTime() + 60 * 86400000);
+  const filtered = events.filter(e => e.isLive || e.date <= cutoff).slice(0, 60);
+
+  sportCache = filtered;
+  return filtered;
+}
+
+function formatSportDate(date) {
+  const now = new Date();
+  const diff = date - now;
+  const diffDays = Math.floor(diff / 86400000);
+  const todayStr = now.toISOString().slice(0,10);
+  const evStr = date.toISOString().slice(0,10);
+  const timeStr = date.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+
+  if (evStr === todayStr) return `Vandaag ${timeStr}`;
+  if (diffDays === 1) return `Morgen ${timeStr}`;
+  if (diffDays < 7) return date.toLocaleDateString('nl-NL', { weekday:'long' }) + ' ' + timeStr;
+  return date.toLocaleDateString('nl-NL', { day:'numeric', month:'short' }) + ' ' + timeStr;
+}
+
+async function renderLiveSport() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const sec = document.createElement('section');
+  sec.className = 'livesport-section';
+  const updateTime = new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+
+  sec.innerHTML = `
+    <div class="livesport-header">
+      <div class="livesport-live-dot"></div>
+      <div class="livesport-title">Live Sport</div>
+    </div>
+    <div class="livesport-sub">Aankomende live sportevenementen op Nederlandse streamingdiensten</div>
+    <div class="livesport-tab-row">
+      <button class="livesport-tab${sportFilter==='all'?   ' active':''}" onclick="setSportFilter('all')">Alles</button>
+      <button class="livesport-tab${sportFilter==='live'?  ' active':''}" onclick="setSportFilter('live')">Nu live</button>
+      <button class="livesport-tab${sportFilter==='today'? ' active':''}" onclick="setSportFilter('today')">Vandaag</button>
+      <button class="livesport-tab${sportFilter==='week'?  ' active':''}" onclick="setSportFilter('week')">Deze week</button>
+    </div>
+    <div id="sportList" class="livesport-list">
+      <div class="top10-loading"><div class="spinner" style="margin:0 auto 8px"></div>Sportagenda laden…</div>
+    </div>
+    <div class="livesport-updated">Bijgewerkt om ${updateTime}</div>
+    <div class="livesport-disclaimer">Evenementen via TheSportsDB & Ergast F1 API. Uitzendrechten kunnen per land en seizoen wisselen. Controleer altijd de dienst zelf voor actuele beschikbaarheid.</div>`;
+
+  main.appendChild(sec);
+
+  const allEvents = await fetchSportEvents();
+  renderSportList(allEvents);
+}
+
+function renderSportList(allEvents) {
+  const listEl = document.getElementById('sportList');
+  if (!listEl) return;
+
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const weekEnd = new Date(now.getTime() + 7 * 86400000);
+
+  let events = allEvents;
+  if (sportFilter === 'live')  events = allEvents.filter(e => e.isLive);
+  if (sportFilter === 'today') events = allEvents.filter(e => e.isLive || e.date.toISOString().slice(0,10) === todayStr);
+  if (sportFilter === 'week')  events = allEvents.filter(e => e.isLive || (e.date >= now && e.date <= weekEnd));
+
+  if (!events.length) {
+    listEl.innerHTML = `<div class="livesport-empty">${sportFilter === 'live' ? 'Geen live evenementen op dit moment.' : 'Geen evenementen gevonden voor deze periode.'}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = events.map(ev => {
+    const streamerInfo = SPORT_STREAMERS[ev.streamer] || { color: '#555', bg: 'rgba(80,80,80,0.85)' };
+    const textColor = streamerInfo.textColor || '#fff';
+    const timeLabel = ev.isLive ? '' : formatSportDate(ev.date);
+    const liveBadge = ev.isLive
+      ? `<div class="sport-live-badge">LIVE</div>`
+      : `<div class="sport-time">${timeLabel}</div>`;
+
+    return `
+      <div class="sport-event${ev.isLive ? ' is-live' : ''}">
+        <div class="sport-icon">${ev.icon || '🏆'}</div>
+        <div class="sport-info">
+          <div class="sport-title">${ev.title}</div>
+          <div class="sport-meta">${ev.subtitle}${ev.venue ? ' · ' + ev.venue : ''}</div>
+        </div>
+        <div class="sport-right">
+          ${liveBadge}
+          <div class="sport-streamer" style="background:${streamerInfo.bg};color:${textColor}">${ev.streamer}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setSportFilter(f) {
+  sportFilter = f;
+  // Update tab active states
+  document.querySelectorAll('.livesport-tab').forEach(t => {
+    const fMap = { 'all':'all','live':'live','today':'today','week':'week' };
+    t.classList.toggle('active', t.textContent.trim().toLowerCase().replace('nu ','').replace('deze ','').replace('alles','all')
+      .replace('live','live').replace('vandaag','today').replace('week','week') === f
+      || (t.textContent.trim() === 'Alles' && f === 'all')
+      || (t.textContent.trim() === 'Nu live' && f === 'live')
+      || (t.textContent.trim() === 'Vandaag' && f === 'today')
+      || (t.textContent.trim() === 'Deze week' && f === 'week')
+    );
+  });
+  if (sportCache) renderSportList(sportCache);
 }
 
 // ── Top 10 ────────────────────────────────────────────────────────────────────
@@ -1313,7 +1659,7 @@ async function renderTop10() {
 
   sec.innerHTML = `
     <div class="top10-header">
-      <div class="top10-title">🔥 Top 10 trending ${periodLabel}</div>
+      <div class="top10-title">Top 10 trending ${periodLabel}</div>
     </div>
     <div class="top10-sub">Meest bekeken content op streaming wereldwijd</div>
     <div class="top10-tab-row">
