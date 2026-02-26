@@ -62,14 +62,7 @@
     .logo-wrap svg { display:block; }
 
 ```
-.source-pills{ display:none; gap:6px; margin-bottom:10px; }
-.source-pill{
-  font-size:10px; padding:3px 8px; border-radius:999px;
-  border:1px solid rgba(255,255,255,0.1); color:var(--t3);
-  background:rgba(255,255,255,0.03);
-}
-.source-pill.wm{ border-color:rgba(10,132,255,0.4); color:var(--accent); background:rgba(10,132,255,0.08); }
-.source-pill.tmdb{ border-color:rgba(50,215,75,0.4); color:var(--accent2); background:rgba(50,215,75,0.08); }
+.source-pills{ display:none !important; }
 
 .pill-row{
   display:flex; gap:8px; margin-bottom:12px;
@@ -314,8 +307,8 @@ body[data-theme="light"] .drag { background: rgba(0,0,0,0.15); }
   padding:9px 14px; border-radius:999px; border:none; outline:none;
   background:linear-gradient(135deg,#0a84ff,#32d74b);
   color:#fff; font-size:14px; font-weight:600;
-  text-decoration:none; margin-top:4px;
-  box-shadow:0 8px 22px rgba(10,132,255,0.8); cursor:pointer;
+  text-decoration:none; margin-top:14px;
+  cursor:pointer;
 }
 
 /* Ratings & external links row */
@@ -352,6 +345,76 @@ body[data-theme="light"] .drag { background: rgba(0,0,0,0.15); }
 [data-theme="light"] .rating-chip.imdb  { background:rgba(245,197,24,0.1); }
 [data-theme="light"] .rating-chip.rt     { background:rgba(250,50,50,0.1); }
 [data-theme="light"] .rating-chip.tmdb-score { background:rgba(10,132,255,0.08); }
+
+/* ── Top 10 ── */
+.top10-section {
+  margin-top:18px; padding:16px 12px 18px;
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(17,17,26,0.96),rgba(8,8,14,0.98));
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow:0 16px 35px rgba(0,0,0,0.75);
+  animation:fadeUp .35s ease forwards; opacity:0; transform:translateY(8px);
+}
+body[data-theme="light"] .top10-section {
+  background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(240,240,248,0.98));
+  border-color: rgba(0,0,0,0.06); box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.top10-header {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+}
+.top10-title { font-size:15px; font-weight:700; letter-spacing:0.01em; }
+.top10-sub { font-size:12px; color:var(--t3); margin-bottom:12px; }
+.top10-tab-row {
+  display:flex; gap:6px; margin-bottom:14px;
+}
+.top10-tab {
+  padding:5px 12px; border-radius:999px; font-size:11px; font-weight:500;
+  border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
+  color:var(--t2); cursor:pointer; font-family:inherit; transition:all .15s ease;
+}
+.top10-tab.active {
+  border-color:rgba(10,132,255,0.7);
+  background:linear-gradient(135deg,rgba(10,132,255,0.2),rgba(50,215,75,0.08));
+  color:var(--t1);
+}
+body[data-theme="light"] .top10-tab { border-color:rgba(0,0,0,0.1); background:rgba(0,0,0,0.03); color:var(--t2); }
+body[data-theme="light"] .top10-tab.active { background:linear-gradient(135deg,rgba(10,132,255,0.15),rgba(50,215,75,0.06)); border-color:rgba(10,132,255,0.5); color:var(--accent); }
+
+.top10-list { display:flex; flex-direction:column; gap:8px; }
+.top10-item {
+  display:flex; align-items:center; gap:12px;
+  padding:8px 6px; border-radius:12px; cursor:pointer;
+  transition:background .16s ease;
+}
+.top10-item:hover { background:rgba(255,255,255,0.04); }
+body[data-theme="light"] .top10-item:hover { background:rgba(0,0,0,0.04); }
+.top10-rank {
+  font-size:22px; font-weight:900; min-width:32px; text-align:center;
+  line-height:1; color:var(--t3); font-variant-numeric:tabular-nums;
+  font-style:italic;
+}
+.top10-rank.rank-1 { color:var(--t1); font-size:26px; }
+.top10-rank.rank-2 { color:var(--t2); font-size:24px; }
+.top10-rank.rank-3 { color:var(--t2); font-size:23px; }
+.top10-poster {
+  width:48px; height:72px; border-radius:8px; overflow:hidden;
+  background:var(--s3); flex-shrink:0;
+}
+.top10-poster img { width:100%; height:100%; object-fit:cover; display:block; }
+.top10-info { flex:1; min-width:0; }
+.top10-name { font-size:13px; font-weight:600; line-height:1.25; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top10-meta { font-size:11px; color:var(--t3); }
+.top10-score {
+  font-size:12px; font-weight:600;
+  color:#FFD60A; white-space:nowrap; flex-shrink:0;
+}
+.top10-type-badge {
+  font-size:10px; padding:2px 6px; border-radius:6px; margin-left:6px;
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); color:var(--t3);
+}
+body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); }
+.top10-loading { font-size:13px; color:var(--t3); padding:20px 0; text-align:center; }
+.top10-updated { font-size:11px; color:var(--t3); text-align:right; margin-top:10px; }
 
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
@@ -395,9 +458,10 @@ body[data-theme="light"] .drag { background: rgba(0,0,0,0.15); }
   </header>
 
   <div class="pill-row" role="group" aria-label="Type filter">
-    <button class="pill active" data-f="all"   onclick="setType(this)">Alles</button>
-    <button class="pill"        data-f="movie" onclick="setType(this)">Films</button>
-    <button class="pill"        data-f="tv"    onclick="setType(this)">Series</button>
+    <button class="pill active" data-f="all"    onclick="setType(this)">Alles</button>
+    <button class="pill"        data-f="movie"  onclick="setType(this)">Films</button>
+    <button class="pill"        data-f="tv"     onclick="setType(this)">Series</button>
+    <button class="pill"        data-f="top10"  onclick="setType(this)">🔥 Top 10</button>
   </div>
 
   <div id="svcBar" class="svc-bar"></div>
@@ -1189,7 +1253,135 @@ function setType(el) {
   typeFilter = el.dataset.f;
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
-  buildDayList(); renderAll();
+
+  const svcBar  = document.getElementById('svcBar');
+  const navBar  = document.getElementById('navBar');
+
+  if (typeFilter === 'top10') {
+    svcBar.style.display = 'none';
+    navBar.style.display = 'none';
+    renderTop10();
+  } else {
+    svcBar.style.display = '';
+    buildDayList(); renderAll();
+  }
+}
+
+// ── Top 10 ────────────────────────────────────────────────────────────────────
+let top10Period = 'day';    // 'day' | 'week'
+let top10Category = 'all';  // 'all' | 'movie' | 'tv'
+let top10Cache = {};
+
+async function fetchTop10(period, category) {
+  const cKey = `top10_${period}_${category}`;
+  if (top10Cache[cKey]) return top10Cache[cKey];
+  const endpoint = category === 'all'
+    ? `/trending/all/${period}`
+    : `/trending/${category}/${period}`;
+  try {
+    const data = await tmdb(endpoint, { language: 'nl-NL', region: 'NL' });
+    const results = (data.results || []).slice(0, 10);
+    top10Cache[cKey] = results;
+    return results;
+  } catch(e) {
+    console.warn('Top10 fetch error:', e);
+    return [];
+  }
+}
+
+async function renderTop10() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const sec = document.createElement('section');
+  sec.className = 'top10-section';
+
+  const periodLabel = top10Period === 'day' ? 'van vandaag' : 'van deze week';
+  const catLabel = top10Category === 'all' ? 'Alles' : top10Category === 'movie' ? 'Films' : 'Series';
+  const updateTime = new Date().toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
+
+  sec.innerHTML = `
+    <div class="top10-header">
+      <div class="top10-title">🔥 Top 10 trending ${periodLabel}</div>
+    </div>
+    <div class="top10-sub">Meest bekeken content op streaming wereldwijd</div>
+    <div class="top10-tab-row">
+      <button class="top10-tab${top10Period==='day'?' active':''}"   onclick="switchTop10Period('day')">Vandaag</button>
+      <button class="top10-tab${top10Period==='week'?' active':''}"  onclick="switchTop10Period('week')">Deze week</button>
+      <button class="top10-tab${top10Category==='all'?' active':''}"    onclick="switchTop10Cat('all')">Alles</button>
+      <button class="top10-tab${top10Category==='movie'?' active':''}"  onclick="switchTop10Cat('movie')">Films</button>
+      <button class="top10-tab${top10Category==='tv'?' active':''}"     onclick="switchTop10Cat('tv')">Series</button>
+    </div>
+    <div id="top10List" class="top10-list">
+      <div class="top10-loading"><div class="spinner" style="margin:0 auto 8px"></div>Laden…</div>
+    </div>
+    <div class="top10-updated">Bijgewerkt om ${updateTime}</div>`;
+
+  main.appendChild(sec);
+
+  const items = await fetchTop10(top10Period, top10Category);
+  const listEl = document.getElementById('top10List');
+  if (!listEl) return;
+
+  if (!items.length) {
+    listEl.innerHTML = '<div class="top10-loading">Geen data beschikbaar.</div>';
+    return;
+  }
+
+  listEl.innerHTML = items.map((item, idx) => {
+    const rank = idx + 1;
+    const isTV = item.media_type === 'tv' || (!item.title && item.name);
+    const title = item.title || item.name || item.original_title || item.original_name || '?';
+    const poster = item.poster_path ? `${TMDB_IMG}${item.poster_path}` : '';
+    const year = (item.release_date || item.first_air_date || '').slice(0,4);
+    const score = item.vote_average ? Number(item.vote_average).toFixed(1) : '';
+    const typeLabel = isTV ? 'Serie' : 'Film';
+    const rankCls = rank <= 3 ? `rank-${rank}` : '';
+    const safeTitle = title.replace(/'/g,"&#39;");
+    const tmdbId = item.id;
+    const mediaType = item.media_type || (isTV ? 'tv' : 'movie');
+
+    return `
+      <div class="top10-item" onclick="openTop10Modal(${tmdbId},'${mediaType}','${safeTitle}')" role="button">
+        <div class="top10-rank ${rankCls}">${rank}</div>
+        <div class="top10-poster">
+          ${poster ? `<img src="${poster}" alt="${safeTitle}" loading="lazy">` : ''}
+        </div>
+        <div class="top10-info">
+          <div class="top10-name">${title}<span class="top10-type-badge">${typeLabel}</span></div>
+          <div class="top10-meta">${year}${score ? ` · Trending #${rank}` : ''}</div>
+        </div>
+        ${score ? `<div class="top10-score">★ ${score}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function switchTop10Period(p) { top10Period = p; renderTop10(); }
+function switchTop10Cat(c)    { top10Category = c; renderTop10(); }
+
+async function openTop10Modal(tmdbId, mediaType, fallbackTitle) {
+  // Bouw een nep-item aan zodat openModal het aankan
+  const existing = allItems.find(i => String(i.tmdb_id) === String(tmdbId));
+  if (existing) { openModal(existing.id); return; }
+
+  // Maak een tijdelijk item
+  const fakeItem = {
+    id: `top10-${tmdbId}`,
+    title: fallbackTitle,
+    img: null,
+    _type: mediaType === 'tv' ? 'tv' : 'movie',
+    _date: '',
+    _src: { name: 'Streaming' },
+    _style: { color: '#0a84ff', text: '#fff' },
+    _key: 'streaming',
+    _originType: 'licensed',
+    _source: 'tmdb',
+    tmdb_id: tmdbId,
+    overview: '',
+    user_rating: 0,
+  };
+  allItems.push(fakeItem);
+  openModal(`top10-${tmdbId}`);
 }
 function setSvc(el) {
   svcFilter = el.dataset.k;
