@@ -1,10 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <title>StreamGids</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- PWA / iOS homescreen -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="StreamGids" />
@@ -61,285 +61,310 @@
     .logo-wrap{ display:flex; align-items:center; gap:10px; }
     .logo-wrap svg { display:block; }
 
-    .source-pills{ display:none; gap:6px; margin-bottom:10px; }
-    .source-pill{
-      font-size:10px; padding:3px 8px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.1); color:var(--t3);
-      background:rgba(255,255,255,0.03);
-    }
-    .source-pill.wm{ border-color:rgba(10,132,255,0.4); color:var(--accent); background:rgba(10,132,255,0.08); }
-    .source-pill.tmdb{ border-color:rgba(50,215,75,0.4); color:var(--accent2); background:rgba(50,215,75,0.08); }
+```
+.source-pills{ display:none; gap:6px; margin-bottom:10px; }
+.source-pill{
+  font-size:10px; padding:3px 8px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.1); color:var(--t3);
+  background:rgba(255,255,255,0.03);
+}
+.source-pill.wm{ border-color:rgba(10,132,255,0.4); color:var(--accent); background:rgba(10,132,255,0.08); }
+.source-pill.tmdb{ border-color:rgba(50,215,75,0.4); color:var(--accent2); background:rgba(50,215,75,0.08); }
 
-    .pill-row{
-      display:flex; gap:8px; margin-bottom:12px;
-      flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px;
-      -webkit-overflow-scrolling:touch;
-    }
-    .pill-row::-webkit-scrollbar{display:none}
-    .pill{
-      padding:6px 12px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.03);
-      color:var(--t2); font-size:12px;
-      display:flex; align-items:center; gap:6px;
-      cursor:pointer; transition:all .18s ease;
-      font-family:inherit;
-    }
-    .icon-btn {
-      display:flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.1);
-      background:rgba(255,255,255,0.04);
-      color:var(--t2); font-size:16px;
-      cursor:pointer; transition:all .16s ease;
-      font-family:inherit;
-    }
-    .icon-btn:hover { border-color:rgba(10,132,255,0.5); color:var(--t1); }
-    [data-theme="light"] .icon-btn { border-color:rgba(0,0,0,0.12); background:rgba(0,0,0,0.04); }
+.pill-row{
+  display:flex; gap:8px; margin-bottom:12px;
+  flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px;
+  -webkit-overflow-scrolling:touch;
+}
+.pill-row::-webkit-scrollbar{display:none}
+.pill{
+  padding:6px 12px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.03);
+  color:var(--t2); font-size:12px;
+  display:flex; align-items:center; gap:6px;
+  cursor:pointer; transition:all .18s ease;
+  font-family:inherit;
+}
+.icon-btn {
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);
+  color:var(--t2); font-size:16px;
+  cursor:pointer; transition:all .16s ease;
+  font-family:inherit;
+}
+.icon-btn:hover { border-color:rgba(10,132,255,0.5); color:var(--t1); }
+[data-theme="light"] .icon-btn { border-color:rgba(0,0,0,0.12); background:rgba(0,0,0,0.04); }
 
-    .theme-btn {
-      display:flex; align-items:center; justify-content:center;
-      padding:6px 14px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.2);
-      background:rgba(255,255,255,0.08);
-      color:var(--t1); font-size:12px; font-weight:500;
-      cursor:pointer; transition:all .16s ease;
-      font-family:inherit;
-      min-width:72px; text-align:center;
-    }
-    .theme-btn:hover { border-color:rgba(10,132,255,0.5); }
-    [data-theme="light"] .theme-btn {
-      border-color:rgba(0,0,0,0.12);
-      background:rgba(0,0,0,0.04);
-      color:var(--t2);
-    }
-    .header-actions { display:flex; align-items:center; gap:8px; }
-    .fav-btn {
-      position:absolute; top:6px; right:28px;
-      width:22px; height:22px; border-radius:999px;
-      background:rgba(0,0,0,0.5); border:none;
-      color:#fff; font-size:12px; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      backdrop-filter:blur(8px); transition:transform .15s ease;
-    }
-    .fav-btn.active { color:#FFD60A; }
-    .fav-btn:hover { transform:scale(1.2); }
-    .share-btn {
-      display:flex; align-items:center; justify-content:center; gap:6px;
-      padding:9px 14px; border-radius:999px; border:1px solid rgba(255,255,255,0.15);
-      background:rgba(255,255,255,0.06);
-      color:var(--t1); font-size:13px; font-weight:500;
-      cursor:pointer; margin-top:8px; width:100%;
-      font-family:inherit; transition:all .16s ease;
-    }
-    .share-btn:hover { background:rgba(255,255,255,0.1); }
-    [data-theme="light"] .share-btn { border-color:rgba(0,0,0,0.12); background:rgba(0,0,0,0.04); color:var(--t1); }
-    .pill.active{
-      border-color:rgba(10,132,255,0.7);
-      background:linear-gradient(135deg,rgba(10,132,255,0.2),rgba(50,215,75,0.08));
-      color:var(--t1); box-shadow:0 0 0 1px rgba(10,132,255,0.3);
-    }
+.theme-btn {
+  display:flex; align-items:center; justify-content:center;
+  padding:6px 14px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.08);
+  color:var(--t1); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .16s ease;
+  font-family:inherit;
+  min-width:72px; text-align:center;
+}
+.theme-btn:hover { border-color:rgba(10,132,255,0.5); }
+[data-theme="light"] .theme-btn {
+  border-color:rgba(0,0,0,0.12);
+  background:rgba(0,0,0,0.04);
+  color:var(--t2);
+}
+.header-actions { display:flex; align-items:center; gap:8px; }
 
-    .svc-bar{
-      display:flex; overflow-x:auto;
-      gap:8px; padding:6px 2px 6px 0;
-      margin-bottom:8px; -webkit-overflow-scrolling:touch;
-    }
-    .svc-bar::-webkit-scrollbar{display:none}
-    .sc{
-      flex:0 0 auto; display:flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px;
-      background:rgba(15,15,24,0.9);
-      border:1px solid rgba(255,255,255,0.06);
-      color:var(--t2); font-size:11px; cursor:pointer;
-      transition:all .16s ease; white-space:nowrap;
-      font-family:inherit;
-    }
-    .sc img{ width:16px; height:16px; border-radius:4px; object-fit:cover; }
-    .sc .dot{ width:10px; height:10px; border-radius:999px; flex-shrink:0; }
-    .sc.active{
-      border-color:rgba(10,132,255,0.75);
-      background:linear-gradient(135deg,rgba(10,132,255,0.25),rgba(50,215,75,0.12));
-      color:var(--t1); box-shadow:0 0 0 1px rgba(10,132,255,0.4);
-    }
+.share-btn {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:9px 14px; border-radius:999px; border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.06);
+  color:var(--t1); font-size:13px; font-weight:500;
+  cursor:pointer; margin-top:8px; width:100%;
+  font-family:inherit; transition:all .16s ease;
+}
+.share-btn:hover { background:rgba(255,255,255,0.1); }
+[data-theme="light"] .share-btn { border-color:rgba(0,0,0,0.12); background:rgba(0,0,0,0.04); color:var(--t1); }
+.pill.active{
+  border-color:rgba(10,132,255,0.7);
+  background:linear-gradient(135deg,rgba(10,132,255,0.2),rgba(50,215,75,0.08));
+  color:var(--t1); box-shadow:0 0 0 1px rgba(10,132,255,0.3);
+}
 
-    .nav-bar{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:8px; gap:8px;
-    }
-    .nav-btn{
-      display:flex; align-items:center; gap:6px;
-      padding:8px 14px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.1);
-      background:rgba(255,255,255,0.04);
-      color:var(--t2); font-size:12px; font-weight:500;
-      cursor:pointer; transition:all .16s ease; white-space:nowrap;
-      font-family:inherit;
-    }
-    .nav-btn:hover:not(:disabled){ border-color:rgba(10,132,255,0.5); color:var(--t1); }
-    .nav-btn:disabled{ opacity:0.3; cursor:default; pointer-events:none; }
-    .nav-range{ font-size:12px; color:var(--t3); text-align:center; flex:1; }
+.svc-bar{
+  display:flex; overflow-x:auto;
+  gap:8px; padding:6px 2px 6px 0;
+  margin-bottom:8px; -webkit-overflow-scrolling:touch;
+}
+.svc-bar::-webkit-scrollbar{display:none}
+.sc{
+  flex:0 0 auto; display:flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px;
+  background:rgba(15,15,24,0.9);
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--t2); font-size:11px; cursor:pointer;
+  transition:all .16s ease; white-space:nowrap;
+  font-family:inherit;
+}
+.sc img{ width:16px; height:16px; border-radius:4px; object-fit:cover; }
+.sc .dot{ width:10px; height:10px; border-radius:999px; flex-shrink:0; }
+.sc.active{
+  border-color:rgba(10,132,255,0.75);
+  background:linear-gradient(135deg,rgba(10,132,255,0.25),rgba(50,215,75,0.12));
+  color:var(--t1); box-shadow:0 0 0 1px rgba(10,132,255,0.4);
+}
 
-    .loading-screen,.error-screen{
-      min-height:50vh; display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      text-align:center; color:var(--t2);
-    }
-    .spinner{
-      width:22px; height:22px; border-radius:999px;
-      border:2px solid rgba(255,255,255,0.08);
-      border-top-color:var(--accent);
-      animation:spin 0.8s linear infinite; margin-bottom:14px;
-    }
-    .loading-text{ font-size:14px; }
-    .loading-sub{ font-size:12px; color:var(--t3); margin-top:6px; }
-    .error-icon{ font-size:32px; margin-bottom:10px; }
-    .error-title{ font-weight:600; margin-bottom:4px; }
-    .error-msg{ font-size:13px; color:var(--t3); max-width:260px; margin:0 auto 14px; }
-    .retry-btn{
-      border:none; outline:none; padding:8px 16px; border-radius:999px;
-      background:var(--accent); color:#fff; font-size:13px;
-      font-weight:500; cursor:pointer;
-      box-shadow:0 6px 16px rgba(10,132,255,0.6);
-    }
+.nav-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:8px; gap:8px;
+}
+.nav-btn{
+  display:flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);
+  color:var(--t2); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .16s ease; white-space:nowrap;
+  font-family:inherit;
+}
+.nav-btn:hover:not(:disabled){ border-color:rgba(10,132,255,0.5); color:var(--t1); }
+.nav-btn:disabled{ opacity:0.3; cursor:default; pointer-events:none; }
+.nav-range{ font-size:12px; color:var(--t3); text-align:center; flex:1; }
 
-    .day-section{
-      margin-top:18px; padding:16px 12px 18px;
-      border-radius:18px;
-      background:linear-gradient(145deg,rgba(17,17,26,0.96),rgba(8,8,14,0.98));
-      border:1px solid rgba(255,255,255,0.04);
-      box-shadow:0 16px 35px rgba(0,0,0,0.75);
-      animation:fadeUp .35s ease forwards;
-      opacity:0; transform:translateY(8px);
-    }
-    .day-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
-    .day-name{ font-size:14px; font-weight:600; letter-spacing:0.01em; }
-    .today-chip{
-      font-size:11px; padding:3px 8px;
-      background: #30af4c;
-      color: #fff;
-  	  font-weight: 700;
-    }
-    .day-sub{ font-size:12px; color:var(--t3); margin-bottom:8px; }
-    .cat-row{ font-size:12px; color: #fff; margin:10px 0 6px; }
+.loading-screen,.error-screen{
+  min-height:50vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center; color:var(--t2);
+}
+.spinner{
+  width:22px; height:22px; border-radius:999px;
+  border:2px solid rgba(255,255,255,0.08);
+  border-top-color:var(--accent);
+  animation:spin 0.8s linear infinite; margin-bottom:14px;
+}
+.loading-text{ font-size:14px; }
+.loading-sub{ font-size:12px; color:var(--t3); margin-top:6px; }
+.error-icon{ font-size:32px; margin-bottom:10px; }
+.error-title{ font-weight:600; margin-bottom:4px; }
+.error-msg{ font-size:13px; color:var(--t3); max-width:260px; margin:0 auto 14px; }
+.retry-btn{
+  border:none; outline:none; padding:8px 16px; border-radius:999px;
+  background:var(--accent); color:#fff; font-size:13px;
+  font-weight:500; cursor:pointer;
+  box-shadow:0 6px 16px rgba(10,132,255,0.6);
+}
 
-    .scroll-track{
-      display:flex; gap:10px; overflow-x:auto;
-      padding-bottom:4px; margin-bottom:6px;
-      -webkit-overflow-scrolling:touch;
-    }
-    .scroll-track::-webkit-scrollbar{height:0}
+.day-section{
+  margin-top:18px; padding:16px 12px 18px;
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(17,17,26,0.96),rgba(8,8,14,0.98));
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow:0 16px 35px rgba(0,0,0,0.75);
+  animation:fadeUp .35s ease forwards;
+  opacity:0; transform:translateY(8px);
+}
+.day-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+.day-name{ font-size:14px; font-weight:600; letter-spacing:0.01em; }
+.today-chip{
+  font-size:11px; padding:3px 8px;
+  background: #30af4c;
+  color: #fff;
+  font-weight: 700;
+}
+.day-sub{ font-size:12px; color:var(--t3); margin-bottom:8px; }
+.cat-row{ font-size:12px; color: #fff; margin:10px 0 6px; }
 
-    .card{
-      flex:0 0 142px; background:var(--card);
-      border-radius:16px; border:1px solid rgba(255,255,255,0.06);
-      padding:6px 6px 10px; cursor:pointer;
-      transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
-      box-shadow:0 10px 22px rgba(0,0,0,0.7);
-    }
-    .card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 16px 30px rgba(0,0,0,0.9);
-      border-color:rgba(10,132,255,0.5);
-      background:radial-gradient(circle at top,rgba(10,132,255,0.16),var(--card));
-    }
-    .card-poster{
-      position:relative; border-radius:12px; overflow:hidden;
-      background:var(--s3); margin-bottom:6px; aspect-ratio:2/3;
-    }
-    .card-poster img.poster{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
-    .fallback{
-      position:absolute; inset:0; display:flex;
-      align-items:center; justify-content:center;
-      padding:8px; color:var(--t2); font-size:11px; text-align:center;
-    }
-    .new-label{
-      position:absolute; top:6px; left:6px; font-size:10px;
-      padding:2px 6px; border-radius:999px;
-      background:rgba(50,215,75,0.92); color:#000; font-weight:600;
-    }
-    .badge{
-      position:absolute; bottom:6px; left:6px; font-size:10px;
-      padding:2px 6px; border-radius:999px;
-      display:inline-flex; align-items:center;
-      max-width:calc(100% - 12px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      backdrop-filter:blur(12px);
-    }
-    .src-dot{
-      position:absolute; top:6px; right:6px; width:6px; height:6px; border-radius:999px;
-    }
-    .season-badge{
-      position:absolute; top:6px; right:16px;
-      font-size:10px; font-weight:700;
-      padding:2px 6px; border-radius:999px;
-      background:rgba(0,0,0,0.72); color:#fff;
-      backdrop-filter:blur(8px);
-      border:1px solid rgba(255,255,255,0.2);
-    }
-    .card-title{
-      font-size:12px; font-weight:500; line-height:1.2;
-      margin-bottom:2px; max-height:2.4em; overflow:hidden;
-    }
-    .card-meta{ font-size:11px; color:var(--t3); }
-    .origin-badge{
-      font-size:10px; padding:2px 6px; border-radius:6px;
-      margin-left:6px; border:1px solid;
-    }
-    .origin-badge.original{ background:rgba(50,215,75,0.2); color:#32d74b; border-color:rgba(50,215,75,0.4); }
-    .origin-badge.licensed{ background:rgba(255,193,7,0.2); color:#f6c23e; border-color:rgba(255,193,7,0.4); }
-    .divider{ margin-top:10px; height:1px; background:linear-gradient(to right,rgba(255,255,255,0.12),rgba(255,255,255,0.02)); }
-    .empty-day{ font-size:13px; color:var(--t3); padding:8px 0; }
+.scroll-track{
+  display:flex; gap:10px; overflow-x:auto;
+  padding-bottom:4px; margin-bottom:6px;
+  -webkit-overflow-scrolling:touch;
+}
+.scroll-track::-webkit-scrollbar{height:0}
 
-    #overlay{
-      position:fixed; inset:0;
-      background:rgba(3,3,8,0.88);
-      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-      display:none; align-items:flex-end; justify-content:center; z-index:20;
-    }
-    #overlay.open{display:flex;}
-    .sheet-header{ display:flex; gap:12px; margin-bottom:10px; }
-    .sp{ width:84px; height:126px; border-radius:14px; overflow:hidden; background:var(--s3); flex-shrink:0; }
-    .sp img{ width:100%; height:100%; object-fit:cover; }
-    .sinf{ flex:1; min-width:0; }
-    .ssvc{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--t2); margin-bottom:3px; }
-    .stitle{ font-size:16px; font-weight:600; margin-bottom:2px; }
-    .smeta{ font-size:12px; color:var(--t3); margin-bottom:4px; }
-    .stags{ font-size:11px; margin-bottom:4px; }
-    .stag{ display:inline-block; padding:2px 7px; border-radius:999px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); margin-right:4px; margin-bottom:3px; }
-    .srating{ font-size:12px; color:var(--t2); }
-    .sheet-body{ font-size:13px; color:var(--t2); line-height:1.6; overflow:auto; padding-right:2px; margin-bottom:8px; }
-    .sheet{
-      width:100%; max-width:640px;
-      border-radius:22px 22px 0 0;
-      background:linear-gradient(160deg,#101018,#06060d);
-      padding:14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
-      border:1px solid rgba(255,255,255,0.08); border-bottom:none;
-      box-shadow:0 -18px 40px rgba(0,0,0,0.95);
-      max-height:88vh; display:flex; flex-direction:column;
-      animation:slideUp .28s ease-out;
-    }
-    .drag{ width:36px; height:4px; border-radius:999px; background:rgba(255,255,255,0.2); margin:0 auto 8px; }
-    body[data-theme="light"] .drag { background: rgba(0,0,0,0.15); }
-    .watch-btn{
-      width:100%; display:flex; align-items:center; justify-content:center; gap:6px;
-      padding:9px 14px; border-radius:999px; border:none; outline:none;
-      background:linear-gradient(135deg,#0a84ff,#32d74b);
-      color:#fff; font-size:14px; font-weight:600;
-      text-decoration:none; margin-top:4px;
-      box-shadow:0 8px 22px rgba(10,132,255,0.8); cursor:pointer;
-    }
+.card{
+  flex:0 0 142px; background:var(--card);
+  border-radius:16px; border:1px solid rgba(255,255,255,0.06);
+  padding:6px 6px 10px; cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
+  box-shadow:0 10px 22px rgba(0,0,0,0.7);
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 30px rgba(0,0,0,0.9);
+  border-color:rgba(10,132,255,0.5);
+  background:radial-gradient(circle at top,rgba(10,132,255,0.16),var(--card));
+}
+.card-poster{
+  position:relative; border-radius:12px; overflow:hidden;
+  background:var(--s3); margin-bottom:6px; aspect-ratio:2/3;
+}
+.card-poster img.poster{ width:100%; height:100%; object-fit:cover; display:block; background:#000; }
+.fallback{
+  position:absolute; inset:0; display:flex;
+  align-items:center; justify-content:center;
+  padding:8px; color:var(--t2); font-size:11px; text-align:center;
+}
+.new-label{
+  position:absolute; top:6px; left:6px; font-size:10px;
+  padding:2px 6px; border-radius:999px;
+  background:rgba(50,215,75,0.92); color:#000; font-weight:600;
+}
+.badge{
+  position:absolute; bottom:6px; left:6px; font-size:10px;
+  padding:2px 6px; border-radius:999px;
+  display:inline-flex; align-items:center;
+  max-width:calc(100% - 12px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  backdrop-filter:blur(12px);
+}
+.season-badge{
+  position:absolute; top:6px; right:6px;
+  font-size:10px; font-weight:700;
+  padding:2px 6px; border-radius:999px;
+  background:rgba(0,0,0,0.72); color:#fff;
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.2);
+}
+.card-title{
+  font-size:12px; font-weight:500; line-height:1.2;
+  margin-bottom:2px; max-height:2.4em; overflow:hidden;
+}
+.card-meta{ font-size:11px; color:var(--t3); }
+.origin-badge{
+  font-size:10px; padding:2px 6px; border-radius:6px;
+  margin-left:6px; border:1px solid;
+}
+.origin-badge.original{ background:rgba(50,215,75,0.2); color:#32d74b; border-color:rgba(50,215,75,0.4); }
+.origin-badge.licensed{ background:rgba(255,193,7,0.2); color:#f6c23e; border-color:rgba(255,193,7,0.4); }
+.divider{ margin-top:10px; height:1px; background:linear-gradient(to right,rgba(255,255,255,0.12),rgba(255,255,255,0.02)); }
+.empty-day{ font-size:13px; color:var(--t3); padding:8px 0; }
 
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-    @media(min-width:768px){.app{padding-top:28px}}
+#overlay{
+  position:fixed; inset:0;
+  background:rgba(3,3,8,0.88);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  display:none; align-items:flex-end; justify-content:center; z-index:20;
+}
+#overlay.open{display:flex;}
+.sheet-header{ display:flex; gap:12px; margin-bottom:10px; }
+.sp{ width:84px; height:126px; border-radius:14px; overflow:hidden; background:var(--s3); flex-shrink:0; }
+.sp img{ width:100%; height:100%; object-fit:cover; }
+.sinf{ flex:1; min-width:0; }
+.ssvc{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--t2); margin-bottom:3px; }
+.stitle{ font-size:16px; font-weight:600; margin-bottom:2px; }
+.smeta{ font-size:12px; color:var(--t3); margin-bottom:4px; }
+.stags{ font-size:11px; margin-bottom:4px; }
+.stag{ display:inline-block; padding:2px 7px; border-radius:999px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); margin-right:4px; margin-bottom:3px; }
+.srating{ font-size:12px; color:var(--t2); }
+.sheet-body{ font-size:13px; color:var(--t2); line-height:1.6; overflow:auto; padding-right:2px; margin-bottom:8px; }
+.sheet{
+  width:100%; max-width:640px;
+  border-radius:22px 22px 0 0;
+  background:linear-gradient(160deg,#101018,#06060d);
+  padding:14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border:1px solid rgba(255,255,255,0.08); border-bottom:none;
+  box-shadow:0 -18px 40px rgba(0,0,0,0.95);
+  max-height:88vh; display:flex; flex-direction:column;
+  animation:slideUp .28s ease-out;
+}
+.drag{ width:36px; height:4px; border-radius:999px; background:rgba(255,255,255,0.2); margin:0 auto 8px; }
+body[data-theme="light"] .drag { background: rgba(0,0,0,0.15); }
+.watch-btn{
+  width:100%; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:9px 14px; border-radius:999px; border:none; outline:none;
+  background:linear-gradient(135deg,#0a84ff,#32d74b);
+  color:#fff; font-size:14px; font-weight:600;
+  text-decoration:none; margin-top:4px;
+  box-shadow:0 8px 22px rgba(10,132,255,0.8); cursor:pointer;
+}
+
+/* Ratings & external links row */
+.ratings-row {
+  display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;
+}
+.rating-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 10px; border-radius:999px;
+  font-size:12px; font-weight:600;
+  text-decoration:none; cursor:pointer;
+  transition:opacity .15s ease;
+  border:1px solid;
+}
+.rating-chip:hover { opacity:0.8; }
+.rating-chip.imdb {
+  background:rgba(245,197,24,0.12);
+  border-color:rgba(245,197,24,0.4);
+  color:#f5c518;
+}
+.rating-chip.rt {
+  background:rgba(250,50,50,0.12);
+  border-color:rgba(250,50,50,0.4);
+  color:#fa6060;
+}
+.rating-chip.tmdb-score {
+  background:rgba(10,132,255,0.12);
+  border-color:rgba(10,132,255,0.35);
+  color:var(--accent);
+}
+.rating-chip .chip-logo {
+  font-size:11px; font-weight:800; letter-spacing:-0.5px;
+}
+[data-theme="light"] .rating-chip.imdb  { background:rgba(245,197,24,0.1); }
+[data-theme="light"] .rating-chip.rt     { background:rgba(250,50,50,0.1); }
+[data-theme="light"] .rating-chip.tmdb-score { background:rgba(10,132,255,0.08); }
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(min-width:768px){.app{padding-top:28px}}
+```
+
   </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="logo-wrap">
-      <!-- SG App Icon SVG -->
       <svg width="34" height="34" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:14px;overflow:hidden">
         <defs>
           <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -348,19 +373,14 @@
           </linearGradient>
         </defs>
         <rect width="200" height="200" rx="42" fill="url(#bgGrad)"/>
-        <!-- Red square accent top-right (kleiner) -->
         <rect x="138" y="26" width="30" height="30" rx="6" fill="#E8001A"/>
-        <!-- SG letters (iets kleiner, volledig zichtbaar) -->
         <text x="100" y="116" text-anchor="middle" dominant-baseline="middle"
               font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif"
               font-size="120" font-weight="800" fill="white" letter-spacing="-6">SG</text>
       </svg>
-      <!-- StreamGids NL text logo SVG -->
       <svg width="190" height="34" viewBox="0 0 320 64" xmlns="http://www.w3.org/2000/svg">
-      <!-- Stream en Gids dichter bij elkaar -->
-        <text x="0" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="600" font-style="regular" fill="var(--t1)" letter-spacing="-1">Stream</text>
-        <text x="152" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="800" font-style="bold" fill="var(--t1)" letter-spacing="-1">Gids</text>
-        <!-- NL badge rechts van 'Gids', niet eroverheen -->
+        <text x="0" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="600" fill="var(--t1)" letter-spacing="-1">Stream</text>
+        <text x="152" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="800" fill="var(--t1)" letter-spacing="-1">Gids</text>
         <rect x="265" y="11" width="42" height="32" rx="8" fill="#E8001A"></rect>
         <text x="285" y="27" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="white" text-anchor="middle" dominant-baseline="middle">NL</text>
       </svg>
@@ -370,7 +390,7 @@
         <span class="source-pill wm" id="wmBadge">WM</span>
         <span class="source-pill tmdb" id="tmdbBadge">TMDB</span>
       </div>
-      <button class="theme-btn" id="toggleTheme" onclick="toggleTheme()" aria-label="Wissel thema (licht/donker)" title="Thema: licht/donker">Licht</button>
+      <button class="theme-btn" id="toggleTheme" onclick="toggleTheme()" aria-label="Wissel thema" title="Thema: licht/donker">Licht</button>
     </div>
   </header>
 
@@ -402,10 +422,11 @@
     <div class="drag" aria-hidden="true"></div>
     <div id="si" class="sheet-header"></div>
     <div id="sd" class="sheet-body"></div>
+    <div id="ratingsRow" class="ratings-row" style="display:none"></div>
     <a id="wb" class="watch-btn" href="#" target="_blank" rel="noopener noreferrer" style="display:none">
       <span aria-hidden="true">▶</span> Streamen
     </a>
-    <button id="shareBtn" class="share-btn" onclick="shareItem()" style="display:none" aria-label="Direct delen">
+    <button id="shareBtn" class="share-btn" onclick="shareItem()" style="display:none" aria-label="Delen">
       ⬆️ Delen
     </button>
   </div>
@@ -418,9 +439,9 @@ const WM_BASE    = 'https://api.watchmode.com/v1';
 const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWI4MDVlODg2MmYyODhkOTQ1NDhmOTU1NGYyZjc2YiIsIm5iZiI6MTY3OTQ3MzE2Ni43NzMsInN1YiI6IjY0MWFiYTBlZjlhYTQ3MDBiMTUxZGRmYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E73D999tD0DBX0aJVVfyooRa3T750C-Y_Hk1TZLr-EM';
 const TMDB_BASE  = 'https://api.themoviedb.org/3';
 const TMDB_IMG   = 'https://image.tmdb.org/t/p/w300';
+const OMDB_KEY   = ''; // Optioneel: voeg je eigen gratis OMDB API key toe via omdbapi.com voor IMDB/RT scores
 
-// ── Providers die we willen tonen als ze in NL beschikbaar zijn ───────────────
-// Gebaseerd op naam-matching (dynamisch opgehaald, IDs kunnen per regio wisselen)
+// ── Providers ─────────────────────────────────────────────────────────────────
 const WANTED_PROVIDERS = [
   { match: 'netflix',       name: 'Netflix',        color: '#E50914', text: '#fff' },
   { match: 'prime video',   name: 'Prime Video',    color: '#00A8E0', text: '#fff' },
@@ -445,57 +466,33 @@ const WANTED_PROVIDERS = [
   { match: 'film1',         name: 'Film1',          color: '#D10000', text: '#fff' },
 ];
 
-// Populaire diensten eerst in de filterbalk
 const POPULAR_KEYS = [
-  'netflix',
-  'prime video',
-  'hbo max',
-  'max ',
-  'disney plus',
-  'disney+',
-  'videoland',
-  'apple tv plus',
-  'apple tv+',
-  'skyshowtime',
-  'viaplay',
-  'path',
-  'npo',
-  'paramount',
-  'mubi',
-  'cinemember',
-  'film1',
-  'canal',
+  'netflix','prime video','hbo max','max ','disney plus','disney+',
+  'videoland','apple tv plus','apple tv+','skyshowtime','viaplay',
+  'path','npo','paramount','mubi','cinemember','film1','canal',
 ];
 
-// Runtime: wordt gevuld door fetchTMDBProviders()
-let TMDB_NL_PROVIDERS = {}; // { id: { name, color, text, logo } }
+let TMDB_NL_PROVIDERS = {};
 
-// ── Stijl helpers ─────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function matchProvider(name) {
   const lower = (name || '').toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
   return WANTED_PROVIDERS.find(p => lower.includes(p.match));
 }
-
 function getSvcStyle(name = '') {
   const p = matchProvider(name);
   return p ? { color: p.color, text: p.text } : { color: '#444444', text: '#fff' };
 }
-
 function providerKey(name) {
   const p = matchProvider(name);
   return p ? p.match : (name || '').toLowerCase().replace(/netherlands/gi,'').replace(/\s+/g,' ').trim();
 }
-
-function isNLStreaming(name) {
-  return !!matchProvider(name);
-}
-
+function isNLStreaming(name) { return !!matchProvider(name); }
 function detectOrigin(svcName) {
   const n = (svcName || '').toLowerCase();
   return ['netflix','disney','max','hbo','videoland','apple','npo'].some(s => n.includes(s))
     ? 'original' : 'licensed';
 }
-
 function resolveType(apiType) {
   if (!apiType) return null;
   const t = String(apiType).toLowerCase();
@@ -508,42 +505,26 @@ function resolveType(apiType) {
 let allItems = [];
 let typeFilter = 'all', svcFilter = 'all';
 const detailCache = {};
-const imgCache = {}; // itemId -> best known poster URL
+const imgCache = {};
 const WINDOW_SIZE = 7;
 let allDays = [], windowStart = 0;
-let wmSources = [];
-let wmSourceMap = {}; // id -> bronobject (alle NL sources)
-let currentModalItem = null; // voor Web Share
+let wmSources = [], wmSourceMap = {};
+let currentModalItem = null;
 
-// ── Favorieten (localStorage) ─────────────────────────────────────────────────
-let favServices = JSON.parse(localStorage.getItem('streamgids_favs') || '[]');
-function toggleFavService(key, btnEl) {
-  const idx = favServices.indexOf(key);
-  if (idx > -1) favServices.splice(idx, 1); else favServices.push(key);
-  localStorage.setItem('streamgids_favs', JSON.stringify(favServices));
-  if (btnEl) btnEl.classList.toggle('active', favServices.includes(key));
-  buildSvcBar();
-}
-function isFav(key) { return favServices.includes(key); }
-
-// ── Thema (localStorage) ──────────────────────────────────────────────────────
+// ── Thema ─────────────────────────────────────────────────────────────────────
 function applyTheme(theme) {
-  if (theme === 'light') {
-    document.body.dataset.theme = 'light';
-  } else {
-    delete document.body.dataset.theme;
-  }
+  if (theme === 'light') document.body.dataset.theme = 'light';
+  else delete document.body.dataset.theme;
   const btn = document.getElementById('toggleTheme');
   if (btn) btn.textContent = theme === 'light' ? 'Donker' : 'Licht';
 }
 function toggleTheme() {
-  const isLight = document.body.dataset.theme === 'light';
-  const next = isLight ? 'dark' : 'light';
+  const next = document.body.dataset.theme === 'light' ? 'dark' : 'light';
   applyTheme(next);
   localStorage.setItem('streamgids_theme', next);
 }
 
-// ── Web Share API ─────────────────────────────────────────────────────────────
+// ── Web Share ─────────────────────────────────────────────────────────────────
 async function shareItem() {
   if (!currentModalItem) return;
   const title = currentModalItem.title || 'StreamGids';
@@ -552,12 +533,11 @@ async function shareItem() {
     try { await navigator.share({ title, text, url: window.location.href }); }
     catch(e) { console.log('Delen geannuleerd:', e); }
   } else {
-    const wa = `https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`;
-    window.open(wa, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
   }
 }
 
-// ── API response cache (sessionStorage) ──────────────────────────────────────
+// ── Session cache ─────────────────────────────────────────────────────────────
 function scGet(key) {
   try { const v = sessionStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
 }
@@ -595,28 +575,22 @@ async function wm(path, params = {}) {
   url.searchParams.set('apiKey', WM_KEY);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const cKey = 'wm_' + url.toString();
-  const cached = scGet(cKey);
-  if (cached) return cached;
+  const cached = scGet(cKey); if (cached) return cached;
   const r = await fetch(url.toString());
   if (!r.ok) throw new Error(`Watchmode ${r.status}`);
-  const data = await r.json();
-  scSet(cKey, data);
-  return data;
+  const data = await r.json(); scSet(cKey, data); return data;
 }
 
 async function tmdb(path, params = {}) {
   const url = new URL(TMDB_BASE + path);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const cKey = 'tmdb_' + url.toString();
-  const cached = scGet(cKey);
-  if (cached) return cached;
+  const cached = scGet(cKey); if (cached) return cached;
   const r = await fetch(url.toString(), {
     headers: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'Content-Type': 'application/json' }
   });
   if (!r.ok) throw new Error(`TMDB ${r.status} (${path})`);
-  const data = await r.json();
-  scSet(cKey, data);
-  return data;
+  const data = await r.json(); scSet(cKey, data); return data;
 }
 
 async function translateToNL(text) {
@@ -629,42 +603,43 @@ async function translateToNL(text) {
   } catch { return text; }
 }
 
-// ── Watchmode ophalen ─────────────────────────────────────────────────────────
+// ── OMDB (optioneel, voor IMDB + RT scores) ───────────────────────────────────
+async function fetchOMDB(imdbId) {
+  if (!OMDB_KEY || !imdbId) return null;
+  const cKey = 'omdb_' + imdbId;
+  const cached = scGet(cKey); if (cached) return cached;
+  try {
+    const r = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${imdbId}`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (d.Response === 'False') return null;
+    scSet(cKey, d); return d;
+  } catch { return null; }
+}
+
+// ── Watchmode ─────────────────────────────────────────────────────────────────
 async function fetchWMSources() {
   try {
     const data = await wm('/sources', { regions: 'NL' });
     const all = Array.isArray(data) ? data : [];
-    // Sla ALLES op in de map, zodat we later elke source_id kunnen opzoeken
-    all.filter(s => s.regions?.includes('NL')).forEach(s => {
-      wmSourceMap[s.id] = s;
-    });
-    wmSources = all
-      .filter(s => s.type === 'sub' && s.regions?.includes('NL'))
+    all.filter(s => s.regions?.includes('NL')).forEach(s => { wmSourceMap[s.id] = s; });
+    wmSources = all.filter(s => s.type === 'sub' && s.regions?.includes('NL'))
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     document.getElementById('wmBadge').title = `Watchmode: ${wmSources.length} diensten`;
-  } catch(e) {
-    console.warn('WM sources failed:', e);
-    wmSources = [];
-  }
+  } catch(e) { console.warn('WM sources failed:', e); wmSources = []; }
 }
 
 async function fetchWMReleases() {
-  // Venster: 60 dagen terug tot 30 dagen vooruit
   const from = dateStr(-60), to = dateStr(30);
   const [movRes, tvRes] = await Promise.all([
     wm('/releases', { regions:'NL', start_date:from, end_date:to, types:'movie', limit:500 }),
     wm('/releases', { regions:'NL', start_date:from, end_date:to, types:'tv_series,tv_miniseries,tv_special,tv_movie', limit:500 }),
   ]);
-
   function parse(res, fallbackType) {
     return (res?.releases || []).map(item => {
-      // Gebruik wmSourceMap voor bekende IDs, val terug op source_name uit de release
       const src = wmSourceMap[item.source_id] || { name: item.source_name || '' };
       const svcName = (src.name || '').replace(/Netherlands/gi,'').trim();
-
-      // Neem ALLES mee wat een herkenbare naam heeft — niet weggooien op ID
       if (!svcName || (!isNLStreaming(svcName) && !src.regions?.includes('NL'))) return null;
-
       const resolved = resolveType(item.type || item.title_type) || fallbackType;
       return {
         ...item,
@@ -680,40 +655,28 @@ async function fetchWMReleases() {
       };
     }).filter(Boolean);
   }
-
   return [...parse(movRes, 'movie'), ...parse(tvRes, 'tv')];
 }
 
-// ── TMDB: dynamisch providers ophalen voor NL ─────────────────────────────────
+// ── TMDB providers ────────────────────────────────────────────────────────────
 async function fetchTMDBProviders() {
   const [movData, tvData] = await Promise.all([
     tmdb('/watch/providers/movie', { watch_region: 'NL', language: 'nl-NL' }),
     tmdb('/watch/providers/tv',    { watch_region: 'NL', language: 'nl-NL' }),
   ]);
-
   const seen = new Set();
   [...(movData.results||[]), ...(tvData.results||[])].forEach(p => {
-    if (seen.has(p.provider_id)) return;
-    seen.add(p.provider_id);
-
-    const matched = matchProvider(p.provider_name);
-    if (!matched) return; // alleen providers die we willen tonen
-
+    if (seen.has(p.provider_id)) return; seen.add(p.provider_id);
+    const matched = matchProvider(p.provider_name); if (!matched) return;
     TMDB_NL_PROVIDERS[p.provider_id] = {
-      name:  matched.name,
-      color: matched.color,
-      text:  matched.text,
-      logo:  p.logo_path ? `https://image.tmdb.org/t/p/original${p.logo_path}` : null,
+      name: matched.name, color: matched.color, text: matched.text,
+      logo: p.logo_path ? `https://image.tmdb.org/t/p/original${p.logo_path}` : null,
       rawName: p.provider_name,
     };
   });
-
-  const count = Object.keys(TMDB_NL_PROVIDERS).length;
-  document.getElementById('tmdbBadge').title = `TMDB: ${count} NL providers gevonden`;
-  console.log('TMDB NL providers:', Object.values(TMDB_NL_PROVIDERS).map(p=>`${p.name} (${p.rawName})`));
+  document.getElementById('tmdbBadge').title = `TMDB: ${Object.keys(TMDB_NL_PROVIDERS).length} NL providers`;
 }
 
-// Haal meerdere pagina's op
 async function tmdbPages(path, params, maxPages = 3) {
   const first = await tmdb(path, { ...params, page: 1 }).catch(() => ({ results: [], total_pages: 0 }));
   const all = [...(first.results || [])];
@@ -751,15 +714,12 @@ async function fetchTMDBReleases() {
     };
   }
 
-  // ── Strategie A: now_playing + on_the_air — meest actuele TMDB content ──
-  // Per item controleren welke NL providers het hebben (per-item watch/providers call)
   document.getElementById('loadSub').textContent = 'TMDB: actuele titels ophalen…';
   try {
     const [nowMov, onAirTV] = await Promise.all([
       tmdbPages('/movie/now_playing', { language:'nl-NL', region:'NL' }, 5),
       tmdbPages('/tv/on_the_air',     { language:'nl-NL' }, 5),
     ]);
-    // Batch: provider-check per item (max 60 items om rate limit te vermijden)
     const checkItems = [
       ...nowMov.slice(0, 50).map(m => ({ ...m, _isTV: false })),
       ...onAirTV.slice(0, 50).map(t => ({ ...t, _isTV: true })),
@@ -771,8 +731,7 @@ async function fetchTMDBReleases() {
           const pd = await tmdb(`/${m._isTV ? 'tv' : 'movie'}/${m.id}/watch/providers`);
           const flat = pd?.results?.NL?.flatrate || [];
           for (const p of flat) {
-            const prov = TMDB_NL_PROVIDERS[p.provider_id];
-            if (!prov) continue;
+            const prov = TMDB_NL_PROVIDERS[p.provider_id]; if (!prov) continue;
             const it = makeItem(m, prov, p.provider_id, m._isTV ? 'tv' : 'movie');
             if (it) items.push(it);
           }
@@ -781,21 +740,17 @@ async function fetchTMDBReleases() {
     }
   } catch(e) { console.warn('TMDB now_playing/on_the_air:', e); }
 
-  // ── Strategie B: discover per provider (populair, afgelopen 3 jaar) ──
-  // Geeft volledige cataloog van bijv. Videoland / Pathé Thuis / NPO
   const BATCH = 4;
   for (let i = 0; i < providerEntries.length; i += BATCH) {
     const batch = providerEntries.slice(i, i + BATCH);
-    document.getElementById('loadSub').textContent =
-      `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
-
+    document.getElementById('loadSub').textContent = `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
     await Promise.all(batch.map(async ([id, prov]) => {
       const base = {
         watch_region: 'NL', with_watch_providers: id,
         with_watch_monetization_types: 'flatrate',
         language: 'nl-NL', sort_by: 'popularity.desc',
       };
-      const cutoff = dateOffset(-1095); // 3 jaar
+      const cutoff = dateOffset(-1095);
       const [movs, tvs] = await Promise.all([
         tmdbPages('/discover/movie', { ...base, 'primary_release_date.gte': cutoff }, 5).catch(() => []),
         tmdbPages('/discover/tv',    { ...base, 'first_air_date.gte': cutoff }, 5).catch(() => []),
@@ -809,75 +764,46 @@ async function fetchTMDBReleases() {
   return items;
 }
 
-
 // ── Samenvoegen & dedupliceren ────────────────────────────────────────────────
 function mergeItems(wmItems, tmdbItems) {
-  const result = [];
-  const seen = new Set(); // "title-lowercase|providerKey"
-
-  // WM items eerst
+  const result = [], seen = new Set();
   for (const item of wmItems) {
     if (!item._date) continue;
     const k = `${(item.title||'').toLowerCase().trim()}|${item._key}`;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    result.push(item);
+    if (seen.has(k)) continue; seen.add(k); result.push(item);
   }
-
-  // TMDB: voeg toe als niet al in WM (zelfde titel + zelfde dienst)
-  // Maar: zelfde film op Netflix én op Videoland moet wél allebei verschijnen
-  const tmdbSeen = new Set(); // "tmdb_id|providerKey" — per dienst één keer
+  const tmdbSeen = new Set();
   for (const item of tmdbItems) {
     if (!item._date || !item.title) continue;
     const dupKey = `${item.tmdb_id}|${item._key}`;
-    if (tmdbSeen.has(dupKey)) continue;
-    tmdbSeen.add(dupKey);
-
+    if (tmdbSeen.has(dupKey)) continue; tmdbSeen.add(dupKey);
     const titleKey = `${(item.title||'').toLowerCase().trim()}|${item._key}`;
-    if (seen.has(titleKey)) continue;
-    seen.add(titleKey);
-    result.push(item);
+    if (seen.has(titleKey)) continue; seen.add(titleKey); result.push(item);
   }
-
   return result;
 }
 
 // ── Service bar ───────────────────────────────────────────────────────────────
 function buildSvcBar() {
   const bar = document.getElementById('svcBar');
-  const provMap = new Map(); // providerKey -> { name, style, logo }
-
+  const provMap = new Map();
   for (const item of allItems) {
-    const key = item._key || '';
-    if (provMap.has(key)) continue;
-    const logo = item._src?.logo_100px || null;
-    provMap.set(key, { name: item._src?.name || key, style: item._style, logo });
+    const key = item._key || ''; if (provMap.has(key)) continue;
+    provMap.set(key, { name: item._src?.name || key, style: item._style, logo: item._src?.logo_100px || null });
   }
-
-  // Populaire diensten eerst, daarna alfabetisch (favorieten blijven bovenaan)
   const entries = [...provMap.entries()].sort((a, b) => {
-    const aFav = isFav(a[0]) ? 0 : 1;
-    const bFav = isFav(b[0]) ? 0 : 1;
-    if (aFav !== bFav) return aFav - bFav;
-
-    const keyA = String(a[0]).toLowerCase();
-    const keyB = String(b[0]).toLowerCase();
-    const rankA = POPULAR_KEYS.indexOf(keyA);
-    const rankB = POPULAR_KEYS.indexOf(keyB);
-    const aRank = rankA === -1 ? 999 : rankA;
-    const bRank = rankB === -1 ? 999 : rankB;
-    if (aRank !== bRank) return aRank - bRank;
-
+    const keyA = String(a[0]).toLowerCase(), keyB = String(b[0]).toLowerCase();
+    const rankA = POPULAR_KEYS.indexOf(keyA) === -1 ? 999 : POPULAR_KEYS.indexOf(keyA);
+    const rankB = POPULAR_KEYS.indexOf(keyB) === -1 ? 999 : POPULAR_KEYS.indexOf(keyB);
+    if (rankA !== rankB) return rankA - rankB;
     return a[1].name.localeCompare(b[1].name);
   });
-
   bar.innerHTML = `<button class="sc active" data-k="all" onclick="setSvc(this)" aria-pressed="true">⭐ Alle streamers</button>`;
   entries.forEach(([key, info]) => {
     const logoEl = info.logo
       ? `<img src="${info.logo}" alt="${info.name} logo" onerror="this.style.display='none'" loading="lazy">`
       : `<div class="dot" style="background:${info.style.color}" aria-hidden="true"></div>`;
-    const favStar = isFav(key) ? '⭐ ' : '';
-    bar.innerHTML += `<button class="sc${svcFilter===key?' active':''}" data-k="${key}" onclick="setSvc(this)" aria-pressed="${svcFilter===key}">${logoEl}${favStar}${info.name}</button>`;
+    bar.innerHTML += `<button class="sc${svcFilter===key?' active':''}" data-k="${key}" onclick="setSvc(this)" aria-pressed="${svcFilter===key}">${logoEl}${info.name}</button>`;
   });
 }
 
@@ -899,11 +825,10 @@ function buildDayList() {
   }
   filteredItems().forEach(i => set.add(i._date));
   allDays = [...set].sort();
-
   const today = todayISO();
   let idx = allDays.indexOf(today);
-  if (idx === -1) { idx = allDays.findIndex(d => d >= today); }
-  if (idx === -1) { idx = Math.max(0, allDays.length - WINDOW_SIZE); }
+  if (idx === -1) idx = allDays.findIndex(d => d >= today);
+  if (idx === -1) idx = Math.max(0, allDays.length - WINDOW_SIZE);
   windowStart = idx;
 }
 
@@ -918,8 +843,7 @@ function grouped() {
 
 function shiftWindow(delta) {
   windowStart = Math.max(0, Math.min(allDays.length - WINDOW_SIZE, windowStart + delta));
-  renderAll();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderAll(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateNavBar() {
@@ -934,18 +858,14 @@ function updateNavBar() {
 }
 
 function renderAll() {
-  const main = document.getElementById('main');
-  main.innerHTML = '';
-  const g = grouped();
-  const today = todayISO();
+  const main = document.getElementById('main'); main.innerHTML = '';
+  const g = grouped(), today = todayISO();
   const vis = allDays.slice(windowStart, windowStart + WINDOW_SIZE);
-
   vis.forEach((iso, i) => {
     const data = g[iso];
     const movies = data?.movies || [], tv = data?.tv || [];
     const sec = document.createElement('section');
-    sec.className = 'day-section';
-    sec.style.animationDelay = `${i * 0.04}s`;
+    sec.className = 'day-section'; sec.style.animationDelay = `${i * 0.04}s`;
     const chip = iso === today ? '<span class="today-chip">Vandaag</span>' : '';
     let html = `
       <div class="day-header"><div class="day-name">${dayName(iso)}</div>${chip}</div>
@@ -957,32 +877,22 @@ function renderAll() {
       if (tv.length)     html += `<div class="cat-row">Series (${tv.length})</div><div class="scroll-track">${tv.map(cardHtml).join('')}</div>`;
     }
     html += '<div class="divider"></div>';
-    sec.innerHTML = html;
-    main.appendChild(sec);
+    sec.innerHTML = html; main.appendChild(sec);
   });
-
   if (!vis.length) {
-    main.innerHTML = `<div class="loading-screen"><div class="loading-text">Geen releases gevonden voor deze periode.</div></div>`;
+    main.innerHTML = `<div class="loading-screen"><div class="loading-text">Geen releases gevonden.</div></div>`;
   }
   updateNavBar();
 }
 
-// Wordt aangeroepen door onerror op card-poster img
-// Zoekt via TMDB een poster op titel en werkt de img bij
 async function cardImgError(imgEl, itemId) {
   imgEl.style.display = 'none';
   const fallback = imgEl.nextElementSibling;
   if (fallback) fallback.style.display = 'flex';
-
-  // Check cache eerst
   if (imgCache[itemId]) {
-    imgEl.src = imgCache[itemId];
-    imgEl.style.display = 'block';
-    if (fallback) fallback.style.display = 'none';
-    return;
+    imgEl.src = imgCache[itemId]; imgEl.style.display = 'block';
+    if (fallback) fallback.style.display = 'none'; return;
   }
-
-  // TMDB zoeken op titel
   const item = allItems.find(i => String(i.id) === String(itemId));
   if (!item || !item.title) return;
   try {
@@ -991,10 +901,8 @@ async function cardImgError(imgEl, itemId) {
     const hit = (res.results || []).find(r => r.poster_path);
     if (hit?.poster_path) {
       const url = `${TMDB_IMG}${hit.poster_path}`;
-      imgCache[itemId] = url;
-      item.img = url; // update voor volgende render
-      imgEl.src = url;
-      imgEl.style.display = 'block';
+      imgCache[itemId] = url; item.img = url;
+      imgEl.src = url; imgEl.style.display = 'block';
       if (fallback) fallback.style.display = 'none';
     }
   } catch {}
@@ -1007,24 +915,15 @@ function cardHtml(item) {
   const oCls = item._originType === 'original' ? 'original' : 'licensed';
   const oTxt = item._originType === 'original' ? 'Origineel' : 'Gelicenseerd';
   const safeId = String(item.id).replace(/['"\\]/g, '');
-  const safeKey = (item._key || '').replace(/['"\\]/g, '');
-
-  // Poster: gebruik imgCache als beschikbaar, anders item.img
   const posterSrc = imgCache[item.id] || item.img || '';
   const imgEl = posterSrc
     ? `<img class="poster" src="${posterSrc}" alt="Poster van ${title}" loading="lazy" onerror="cardImgError(this,'${safeId}')">`
     : '';
   const fallD = posterSrc ? 'none' : 'flex';
-
   const rating = item.user_rating ? `⭐ ${Number(item.user_rating).toFixed(1)}` : (item._type==='movie'?'Film':'Serie');
-  const srcColor = item._source === 'watchmode' ? 'var(--accent)' : 'var(--accent2)';
-
-  // Seizoensbadge: toon als seizoen bekend is (WM geeft het direct mee)
+  // Seizoensbadge top-right (geen src-dot meer)
   const seasonBadge = (item._type === 'tv' && item._season && item._season > 1)
     ? `<div class="season-badge">S${item._season}</div>` : '';
-
-  const favActive = isFav(safeKey) ? ' active' : '';
-
   return `
     <div class="card" onclick="openModal('${safeId}')" role="article" aria-label="${title} op ${svcName}">
       <div class="card-poster">
@@ -1032,8 +931,6 @@ function cardHtml(item) {
         <div class="fallback" style="display:${fallD}" aria-hidden="true"><span>${title}</span></div>
         ${seasonBadge}
         <div class="badge" style="background:${color}dd;color:${text}">${svcName}</div>
-        <div class="src-dot" style="background:${srcColor}" title="${item._source}" aria-hidden="true"></div>
-        <button class="fav-btn${favActive}" onclick="event.stopPropagation();toggleFavService('${safeKey}',this)" aria-label="${isFav(safeKey)?'Verwijder uit':'Voeg toe aan'} favorieten" title="Favoriet">♥</button>
       </div>
       <div class="card-title">${title}</div>
       <div class="card-meta">${rating}<span class="origin-badge ${oCls}">${oTxt}</span></div>
@@ -1042,167 +939,241 @@ function cardHtml(item) {
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 async function openModal(rawId) {
-  const overlay = document.getElementById('overlay');
-  const si = document.getElementById('si'), sd = document.getElementById('sd'), wb = document.getElementById('wb');
-  const shareBtn = document.getElementById('shareBtn');
+  const overlay    = document.getElementById('overlay');
+  const si         = document.getElementById('si');
+  const sd         = document.getElementById('sd');
+  const wb         = document.getElementById('wb');
+  const shareBtn   = document.getElementById('shareBtn');
+  const ratingsRow = document.getElementById('ratingsRow');
 
   const item = allItems.find(i => String(i.id) === String(rawId));
   if (!item) return;
   currentModalItem = item;
 
-  const { title, img, _src, _style, _type, _originType, _source, tmdb_id, watchmode_id } = item;
+  const { title, img, _src, _style, _type, _originType, _source, tmdb_id } = item;
   const svcName = (_src?.name || 'Streaming').replace(/Netherlands/gi,'').trim();
   const { color } = _style;
-
-  // Gebruik imgCache als we al een betere poster hebben
   const initPoster = imgCache[item.id] || img || '';
 
+  // ── Toon direct een initiële staat (niet wachten op API) ──
   si.innerHTML = `
-    <div class="sp">${initPoster?`<img src="${initPoster}" alt="">`:''}</div>
+    <div class="sp">${initPoster ? `<img src="${initPoster}" alt="">` : ''}</div>
     <div class="sinf">
       <div class="ssvc" style="color:${color}">${svcName}</div>
       <div class="stitle">${title}</div>
-      <div class="smeta">${_type==='movie'?'Film':'Serie'}</div>
-      <div style="color:var(--t3);font-size:12px">Details laden…</div>
+      <div class="smeta">${_type === 'movie' ? 'Film' : 'Serie'} · laden…</div>
     </div>`;
-  sd.textContent = 'Beschrijving laden…'; wb.style.display = 'none';
+
+  // Toon bestaande beschrijving direct als beschikbaar (TMDB items hebben dit al)
+  const immediateOverview = item.overview || '';
+  sd.textContent = immediateOverview || 'Beschrijving laden…';
+  ratingsRow.style.display = 'none';
+  ratingsRow.innerHTML = '';
+  wb.style.display = 'none';
   if (shareBtn) shareBtn.style.display = 'flex';
-  overlay.classList.add('open'); document.body.style.overflow = 'hidden';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 
-  let fullTitle = title, year = '', runtime = '', rating = '', genres = '', posterUrl = initPoster;
-  let rawOverview = item.overview || '';
-  let watchLink = null;
-  let seasonInfo = item._season ? `Seizoen ${item._season}` : ''; // WM geeft dit direct
+  let fullTitle = title, year = '', runtime = '', rating = '', genres = '';
+  let rawOverview = immediateOverview;
+  let watchLink = null, imdbId = null;
+  let seasonInfo = item._season ? `Seizoen ${item._season}` : '';
+  let posterUrl = initPoster;
+  let tmdbRating = item.user_rating || 0;
+  let imdbRating = '', rtRating = '';
 
-  // ── TMDB detail ──
-  const resolvedTmdbId = tmdb_id || (_source === 'tmdb' ? String(rawId).replace(/tmdb-(\d+)-.*/,'$1') : null);
+  // ── Stap 1: TMDB detail ophalen ──
+  const resolvedTmdbId = tmdb_id
+    || (_source === 'tmdb' ? String(rawId).replace(/tmdb-(\d+)-.*/,'$1') : null);
+
   if (resolvedTmdbId) {
     const cKey = `tmdb-${_type}-${resolvedTmdbId}`;
     if (!detailCache[cKey]) {
       try {
         const path = _type === 'movie' ? `/movie/${resolvedTmdbId}` : `/tv/${resolvedTmdbId}`;
-        const [det, prov] = await Promise.all([
+        const [det, prov, extIds] = await Promise.all([
           tmdb(path, { language: 'nl-NL' }),
           tmdb(`${path}/watch/providers`),
+          tmdb(`${path}/external_ids`).catch(() => ({})),
         ]);
-        detailCache[cKey] = { det, prov };
+        detailCache[cKey] = { det, prov, extIds };
       } catch(e) { console.warn('TMDB detail:', e); detailCache[cKey] = null; }
     }
     const cached = detailCache[cKey];
     if (cached?.det) {
       const d = cached.det;
-      fullTitle   = d.title || d.name || title;
-      year        = (d.release_date || d.first_air_date || '').slice(0, 4);
-      runtime     = d.runtime ? `${d.runtime} min` : (d.episode_run_time?.[0] ? `${d.episode_run_time[0]} min/afl` : '');
-      rating      = d.vote_average ? `${Number(d.vote_average).toFixed(1)} / 10` : '';
-      genres      = (d.genres || []).slice(0, 4).map(g => `<span class="stag">${g.name}</span>`).join('');
-      rawOverview = d.overview || rawOverview;
-
-      // Seizoen: number_of_seasons voor series
+      fullTitle    = d.title || d.name || title;
+      year         = (d.release_date || d.first_air_date || '').slice(0, 4);
+      runtime      = d.runtime ? `${d.runtime} min` : (d.episode_run_time?.[0] ? `${d.episode_run_time[0]} min/afl` : '');
+      tmdbRating   = d.vote_average || tmdbRating;
+      genres       = (d.genres || []).slice(0, 4).map(g => `<span class="stag">${g.name}</span>`).join('');
+      if (d.overview) rawOverview = d.overview; // overschrijf met Nederlandstalig als aanwezig
       if (_type === 'tv' && d.number_of_seasons) {
-        seasonInfo = `Seizoen ${d.number_of_seasons}`;
-        // Sla seizoen op in item voor card-weergave
+        seasonInfo = `${d.number_of_seasons} seizoen${d.number_of_seasons > 1 ? 'en' : ''}`;
         if (!item._season) item._season = d.number_of_seasons;
       }
-
       if (d.poster_path) {
         posterUrl = `${TMDB_IMG}${d.poster_path}`;
-        // Sla op in cache zodat card direct de goede poster krijgt
-        imgCache[item.id] = posterUrl;
-        // Update de card img direct in de DOM als die zichtbaar is
-        const cardImg = document.querySelector(`.card[onclick*="'${String(item.id).replace(/['"\\]/g,'')}'""] .poster`);
-        if (cardImg) {
-          cardImg.src = posterUrl;
-          cardImg.style.display = 'block';
-          const fb = cardImg.nextElementSibling;
-          if (fb?.classList.contains('fallback')) fb.style.display = 'none';
-        }
+        imgCache[item.id] = posterUrl; item.img = posterUrl;
       }
-
       const nlProv = cached.prov?.results?.NL;
       if (nlProv?.link) watchLink = nlProv.link;
+
+      // IMDB ID uit external_ids
+      imdbId = cached.extIds?.imdb_id || null;
     }
   }
 
-  // ── Watchmode detail (fallback of aanvulling) ──
-  const wmId = watchmode_id || (_source === 'watchmode' ? rawId : null);
+  // ── Stap 2: Watchmode detail (fallback / aanvulling voor WM items) ──
+  const wmId = item.watchmode_id || (_source === 'watchmode' ? rawId : null);
   if (wmId && String(wmId) !== '0') {
     const wKey = `wm-${wmId}`;
     if (!detailCache[wKey]) {
-      try { detailCache[wKey] = await wm(`/title/${wmId}/details`); } catch { detailCache[wKey] = null; }
+      try { detailCache[wKey] = await wm(`/title/${wmId}/details`); }
+      catch { detailCache[wKey] = null; }
     }
     const d = detailCache[wKey];
     if (d) {
-      if (!year)        year     = d.year ? String(d.year) : year;
-      if (!runtime)     runtime  = d.runtime_minutes ? `${d.runtime_minutes} min` : '';
-      if (!rating)      rating   = d.user_rating ? `${Number(d.user_rating).toFixed(1)} / 10` : '';
-      if (!genres && d.genres) genres = (d.genres||[]).slice(0,4).map(g => {
-        const n = typeof g === 'object' ? (g.name||'') : (typeof g === 'string' ? g : '');
-        return (!isNaN(n)||!n) ? '' : `<span class="stag">${n}</span>`;
-      }).filter(Boolean).join('');
-      if (!posterUrl && d.poster) {
-        posterUrl = d.poster;
-        imgCache[item.id] = posterUrl;
+      if (!year)        year    = d.year ? String(d.year) : year;
+      if (!runtime)     runtime = d.runtime_minutes ? `${d.runtime_minutes} min` : '';
+      if (!tmdbRating)  tmdbRating = d.user_rating || 0;
+      if (!genres && d.genres) {
+        genres = (d.genres||[]).slice(0,4).map(g => {
+          const n = typeof g === 'object' ? (g.name||'') : (typeof g === 'string' ? g : '');
+          return (!n || !isNaN(n)) ? '' : `<span class="stag">${n}</span>`;
+        }).filter(Boolean).join('');
       }
-      if (!rawOverview) rawOverview = d.plot_overview || '';
+      if (!posterUrl && d.poster) { posterUrl = d.poster; imgCache[item.id] = posterUrl; }
+      if (!rawOverview && d.plot_overview) rawOverview = d.plot_overview;
       if (!watchLink && d.sources?.length) {
         const nlSub = d.sources.find(s => s.region==='NL' && s.type==='sub');
         const usSub = d.sources.find(s => s.region==='US' && s.type==='sub');
         const nlAny = d.sources.find(s => s.region==='NL');
         watchLink = nlSub?.web_url || usSub?.web_url || nlAny?.web_url || d.sources[0]?.web_url || null;
       }
+      // IMDB id ook via WM
+      if (!imdbId && d.imdb_id) imdbId = d.imdb_id;
     }
   }
 
-  // ── Fallback watch links ──
-  if (!watchLink) {
-    const svc = (_src?.name || '').toLowerCase();
-    if      (svc.includes('netflix'))                      watchLink = `https://www.netflix.com/search?q=${encodeURIComponent(fullTitle)}`;
-    else if (svc.includes('prime')||svc.includes('amazon')) watchLink = `https://www.amazon.nl/s?k=${encodeURIComponent(fullTitle)}`;
-    else if (svc.includes('disney'))                       watchLink = `https://www.disneyplus.com/search/${encodeURIComponent(fullTitle)}`;
-    else if (svc.includes('apple'))                        watchLink = `https://tv.apple.com/`;
-    else if (svc.includes('max')||svc.includes('hbo'))     watchLink = `https://www.max.com/`;
-    else if (svc.includes('sky'))                          watchLink = `https://www.skyshowtime.com/`;
-    else if (svc.includes('videoland'))                    watchLink = `https://www.videoland.com/`;
-    else if (svc.includes('pathé')||svc.includes('pathe')) watchLink = `https://www.pathe-thuis.nl/`;
-    else if (svc.includes('npo'))                          watchLink = `https://npo.nl/`;
-    else if (svc.includes('paramount'))                    watchLink = `https://www.paramountplus.com/nl/`;
-    else if (svc.includes('discovery'))                    watchLink = `https://www.discoveryplus.com/nl/`;
+  // ── Stap 3: Als WM item zonder tmdb_id — zoek TMDB op titel voor beschrijving ──
+  if (!resolvedTmdbId && _source === 'watchmode' && !rawOverview) {
+    try {
+      const type = _type === 'movie' ? 'movie' : 'tv';
+      const searchRes = await tmdb(`/search/${type}`, { query: title, language: 'nl-NL' });
+      const hit = (searchRes.results || []).find(r => r.id);
+      if (hit) {
+        if (!rawOverview && hit.overview) rawOverview = hit.overview;
+        if (!posterUrl && hit.poster_path) {
+          posterUrl = `${TMDB_IMG}${hit.poster_path}`;
+          imgCache[item.id] = posterUrl; item.img = posterUrl;
+        }
+        if (!tmdbRating && hit.vote_average) tmdbRating = hit.vote_average;
+        // Haal ook external_ids op via TMDB search hit
+        if (!imdbId) {
+          try {
+            const extIds = await tmdb(`/${type}/${hit.id}/external_ids`);
+            imdbId = extIds?.imdb_id || null;
+          } catch {}
+        }
+      }
+    } catch(e) { console.warn('TMDB search fallback:', e); }
   }
 
-  // ── Vertalen als nodig (niet blokkeren) ──
-  let nlOverview = rawOverview || 'Geen beschrijving beschikbaar.';
+  // ── Stap 4: OMDB voor IMDB + RT scores (optioneel) ──
+  if (imdbId && OMDB_KEY) {
+    const omdbData = await fetchOMDB(imdbId);
+    if (omdbData) {
+      imdbRating = omdbData.imdbRating && omdbData.imdbRating !== 'N/A' ? omdbData.imdbRating : '';
+      const rtEntry = (omdbData.Ratings || []).find(r => r.Source === 'Rotten Tomatoes');
+      rtRating = rtEntry?.Value || '';
+    }
+  }
 
+  // ── Fallback watchLinks ──
+  if (!watchLink) {
+    const svc = (_src?.name || '').toLowerCase();
+    if      (svc.includes('netflix'))                       watchLink = `https://www.netflix.com/search?q=${encodeURIComponent(fullTitle)}`;
+    else if (svc.includes('prime')||svc.includes('amazon')) watchLink = `https://www.amazon.nl/s?k=${encodeURIComponent(fullTitle)}`;
+    else if (svc.includes('disney'))                        watchLink = `https://www.disneyplus.com/search/${encodeURIComponent(fullTitle)}`;
+    else if (svc.includes('apple'))                         watchLink = `https://tv.apple.com/`;
+    else if (svc.includes('max')||svc.includes('hbo'))      watchLink = `https://www.max.com/`;
+    else if (svc.includes('sky'))                           watchLink = `https://www.skyshowtime.com/`;
+    else if (svc.includes('videoland'))                     watchLink = `https://www.videoland.com/`;
+    else if (svc.includes('path'))                          watchLink = `https://www.pathe-thuis.nl/`;
+    else if (svc.includes('npo'))                           watchLink = `https://npo.nl/`;
+    else if (svc.includes('paramount'))                     watchLink = `https://www.paramountplus.com/nl/`;
+    else if (svc.includes('discovery'))                     watchLink = `https://www.discoveryplus.com/nl/`;
+  }
+
+  // ── UI opbouwen ──
   const oBadge = _originType === 'original'
     ? '<div class="origin-badge original" style="display:inline-block;margin-top:4px">Originele content</div>'
     : '<div class="origin-badge licensed" style="display:inline-block;margin-top:4px">Gelicenseerde content</div>';
 
-  // smeta: type · jaar · runtime · seizoen
   const metaParts = [_type === 'movie' ? 'Film' : 'Serie'];
-  if (year) metaParts.push(year);
-  if (runtime) metaParts.push(runtime);
+  if (year)       metaParts.push(year);
+  if (runtime)    metaParts.push(runtime);
   if (_type === 'tv' && seasonInfo) metaParts.push(seasonInfo);
 
   si.innerHTML = `
-    <div class="sp">${posterUrl?`<img src="${posterUrl}" alt="">`:''}</div>
+    <div class="sp">${posterUrl ? `<img src="${posterUrl}" alt="">` : ''}</div>
     <div class="sinf">
       <div class="ssvc" style="color:${color}">${svcName}</div>
       <div class="stitle">${fullTitle}</div>
       <div class="smeta">${metaParts.join(' · ')}</div>
       <div class="stags">${genres}</div>
-      ${rating?`<div class="srating"><span style="color:#FFD60A">★</span> ${rating}</div>`:''}
       ${oBadge}
     </div>`;
+
+  // Beschrijving — direct tonen wat we hebben, dan eventueel vertalen
+  const nlOverview = rawOverview || 'Geen beschrijving beschikbaar.';
   sd.textContent = nlOverview;
-  // Start optionele vertaling op de achtergrond, zonder de UI te blokkeren
+  // Probeer Engels→NL te vertalen op de achtergrond
   if (rawOverview && /^[A-Za-z\s]{20,}/.test(rawOverview.slice(0, 60))) {
     translateToNL(rawOverview).then(txt => {
-      const finalText = txt && txt !== rawOverview ? txt : nlOverview;
-      if (currentModalItem === item) {
-        sd.textContent = finalText;
-      }
+      if (currentModalItem === item && txt && txt !== rawOverview) sd.textContent = txt;
     }).catch(() => {});
   }
+
+  // ── Ratings & links row ──
+  const ratingChips = [];
+
+  // TMDB score (altijd tonen als beschikbaar)
+  if (tmdbRating && Number(tmdbRating) > 0) {
+    const score = Number(tmdbRating).toFixed(1);
+    const tmdbSearch = resolvedTmdbId
+      ? `https://www.themoviedb.org/${_type === 'movie' ? 'movie' : 'tv'}/${resolvedTmdbId}`
+      : `https://www.themoviedb.org/search?query=${encodeURIComponent(fullTitle)}`;
+    ratingChips.push(`<a class="rating-chip tmdb-score" href="${tmdbSearch}" target="_blank" rel="noopener" aria-label="TMDB score ${score}">
+      <span class="chip-logo">TMDB</span>${score}/10
+    </a>`);
+  }
+
+  // IMDB — link + optionele score
+  const imdbUrl = imdbId
+    ? `https://www.imdb.com/title/${imdbId}/`
+    : `https://www.imdb.com/find/?q=${encodeURIComponent(fullTitle)}&s=tt`;
+  const imdbScoreText = imdbRating ? ` ${imdbRating}/10` : '';
+  ratingChips.push(`<a class="rating-chip imdb" href="${imdbUrl}" target="_blank" rel="noopener" aria-label="IMDB${imdbScoreText}">
+    <span class="chip-logo">IMDb</span>${imdbRating ? imdbRating + '/10' : 'Bekijk op IMDb'}
+  </a>`);
+
+  // Rotten Tomatoes — link + optionele score
+  const rtUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(fullTitle)}`;
+  const rtEmoji = (() => {
+    if (!rtRating) return '🍅';
+    const pct = parseInt(rtRating);
+    return pct >= 60 ? '🍅' : '🤢';
+  })();
+  ratingChips.push(`<a class="rating-chip rt" href="${rtUrl}" target="_blank" rel="noopener" aria-label="Rotten Tomatoes${rtRating ? ' ' + rtRating : ''}">
+    <span class="chip-logo">${rtEmoji} RT</span>${rtRating || 'Bekijk op RT'}
+  </a>`);
+
+  ratingsRow.innerHTML = ratingChips.join('');
+  ratingsRow.style.display = 'flex';
+
+  // Streamen knop
   if (watchLink) { wb.href = watchLink; wb.style.display = 'flex'; }
 }
 
@@ -1220,7 +1191,6 @@ function setType(el) {
   el.classList.add('active');
   buildDayList(); renderAll();
 }
-
 function setSvc(el) {
   svcFilter = el.dataset.k;
   document.querySelectorAll('.sc').forEach(c => c.classList.remove('active'));
@@ -1229,14 +1199,12 @@ function setSvc(el) {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-// Thema initialiseren zodra DOM klaar is
 (function() {
   const saved = localStorage.getItem('streamgids_theme');
   const preferred = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   applyTheme(saved || preferred);
 })();
 
-// Keyboard: ESC sluit de modal
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     const overlay = document.getElementById('overlay');
@@ -1247,27 +1215,24 @@ document.addEventListener('keydown', e => {
     }
   }
 });
+
 async function init() {
   try {
     const loading = document.querySelector('.loading-text');
     const loadSub = document.getElementById('loadSub');
-
     loading.textContent = 'Streamingdiensten ophalen…';
     loadSub.textContent = 'Watchmode + TMDB Nederland';
 
-    // Stap 1: beide service-lijsten ophalen
-    const [,] = await Promise.all([
+    await Promise.all([
       fetchWMSources().catch(e => console.warn('WM sources:', e)),
       fetchTMDBProviders().catch(e => console.warn('TMDB providers:', e)),
     ]);
 
     const tmdbCount = Object.keys(TMDB_NL_PROVIDERS).length;
     document.getElementById('tmdbBadge').textContent = `TMDB ${tmdbCount} diensten`;
-
     loading.textContent = 'Releases laden…';
     loadSub.textContent = `${wmSources.length} WM + ${tmdbCount} TMDB diensten`;
 
-    // Stap 2: releases ophalen van beide bronnen
     const [wmItems, tmdbItems] = await Promise.all([
       fetchWMReleases().catch(e => { console.warn('WM releases:', e); return []; }),
       fetchTMDBReleases().catch(e => { console.warn('TMDB releases:', e); return []; }),
@@ -1275,15 +1240,11 @@ async function init() {
 
     loadSub.textContent = '';
     allItems = mergeItems(wmItems, tmdbItems);
-
     document.getElementById('wmBadge').textContent = `WM ${wmItems.length}`;
     document.getElementById('tmdbBadge').textContent = `TMDB ${tmdbItems.length}`;
 
     if (!allItems.length) throw new Error('Geen releases gevonden voor Nederland.');
-
-    buildSvcBar();
-    buildDayList();
-    renderAll();
+    buildSvcBar(); buildDayList(); renderAll();
   } catch(e) {
     console.error(e);
     document.getElementById('main').innerHTML = `
@@ -1297,5 +1258,6 @@ async function init() {
 }
 init();
 </script>
+
 </body>
 </html>
