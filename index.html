@@ -63,6 +63,24 @@
 
 ```
 .source-pills{ display:none !important; }
+.logo-text {
+  display:flex; align-items:baseline; gap:0; line-height:1;
+}
+.logo-stream {
+  font-size:26px; font-weight:500; letter-spacing:-0.5px;
+  color:var(--t1); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+}
+.logo-gids {
+  font-size:26px; font-weight:800; letter-spacing:-0.5px;
+  color:var(--t1); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+}
+.logo-nl {
+  font-size:11px; font-weight:800; letter-spacing:0.02em;
+  background:#E8001A; color:#fff;
+  padding:2px 5px; border-radius:5px;
+  margin-left:5px; align-self:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+}
 
 .pill-row{
   display:flex; gap:8px; margin-bottom:12px;
@@ -441,18 +459,11 @@ body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border
               font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif"
               font-size="120" font-weight="800" fill="white" letter-spacing="-6">SG</text>
       </svg>
-      <svg width="190" height="34" viewBox="0 0 320 64" xmlns="http://www.w3.org/2000/svg">
-        <text x="0" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="600" fill="var(--t1)" letter-spacing="-1">Stream</text>
-        <text x="152" y="46" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="800" fill="var(--t1)" letter-spacing="-1">Gids</text>
-        <rect x="265" y="11" width="42" height="32" rx="8" fill="#E8001A"></rect>
-        <text x="285" y="27" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="white" text-anchor="middle" dominant-baseline="middle">NL</text>
-      </svg>
+      <div class="logo-text">
+        <span class="logo-stream">Stream</span><span class="logo-gids">Gids</span><span class="logo-nl">NL</span>
+      </div>
     </div>
     <div class="header-actions">
-      <div class="source-pills">
-        <span class="source-pill wm" id="wmBadge">WM</span>
-        <span class="source-pill tmdb" id="tmdbBadge">TMDB</span>
-      </div>
       <button class="theme-btn" id="toggleTheme" onclick="toggleTheme()" aria-label="Wissel thema" title="Thema: licht/donker">Licht</button>
     </div>
   </header>
@@ -461,7 +472,7 @@ body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border
     <button class="pill active" data-f="all"    onclick="setType(this)">Alles</button>
     <button class="pill"        data-f="movie"  onclick="setType(this)">Films</button>
     <button class="pill"        data-f="tv"     onclick="setType(this)">Series</button>
-    <button class="pill"        data-f="top10"  onclick="setType(this)">🔥 Top 10</button>
+    <button class="pill"        data-f="top10"  onclick="setType(this)">Top 10</button>
   </div>
 
   <div id="svcBar" class="svc-bar"></div>
@@ -491,7 +502,7 @@ body[data-theme="light"] .top10-type-badge { background:rgba(0,0,0,0.05); border
       <span aria-hidden="true">▶</span> Streamen
     </a>
     <button id="shareBtn" class="share-btn" onclick="shareItem()" style="display:none" aria-label="Delen">
-      ⬆️ Delen
+      Delen
     </button>
   </div>
 </div>
@@ -689,7 +700,7 @@ async function fetchWMSources() {
     all.filter(s => s.regions?.includes('NL')).forEach(s => { wmSourceMap[s.id] = s; });
     wmSources = all.filter(s => s.type === 'sub' && s.regions?.includes('NL'))
       .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    document.getElementById('wmBadge').title = `Watchmode: ${wmSources.length} diensten`;
+    
   } catch(e) { console.warn('WM sources failed:', e); wmSources = []; }
 }
 
@@ -738,7 +749,7 @@ async function fetchTMDBProviders() {
       rawName: p.provider_name,
     };
   });
-  document.getElementById('tmdbBadge').title = `TMDB: ${Object.keys(TMDB_NL_PROVIDERS).length} NL providers`;
+  
 }
 
 async function tmdbPages(path, params, maxPages = 3) {
@@ -824,7 +835,7 @@ async function fetchTMDBReleases() {
     })).catch(e => console.warn('TMDB discover batch:', e));
   }
 
-  document.getElementById('tmdbBadge').textContent = `TMDB ${items.length}`;
+  
   return items;
 }
 
@@ -1421,7 +1432,7 @@ async function init() {
     ]);
 
     const tmdbCount = Object.keys(TMDB_NL_PROVIDERS).length;
-    document.getElementById('tmdbBadge').textContent = `TMDB ${tmdbCount} diensten`;
+    
     loading.textContent = 'Releases laden…';
     loadSub.textContent = `${wmSources.length} WM + ${tmdbCount} TMDB diensten`;
 
@@ -1432,8 +1443,8 @@ async function init() {
 
     loadSub.textContent = '';
     allItems = mergeItems(wmItems, tmdbItems);
-    document.getElementById('wmBadge').textContent = `WM ${wmItems.length}`;
-    document.getElementById('tmdbBadge').textContent = `TMDB ${tmdbItems.length}`;
+    
+    
 
     if (!allItems.length) throw new Error('Geen releases gevonden voor Nederland.');
     buildSvcBar(); buildDayList(); renderAll();
