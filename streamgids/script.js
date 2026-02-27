@@ -364,7 +364,7 @@ function buildSvcBar() {
     if (rankA !== rankB) return rankA - rankB;
     return a[1].name.localeCompare(b[1].name);
   });
-  bar.innerHTML = `<button class="sc active" data-k="all" onclick="setSvc(this)" aria-pressed="true">⭐ Alle streamers</button>`;
+  bar.innerHTML = `<button class="sc active" data-k="all" onclick="setSvc(this)" aria-pressed="true">Alle streamers</button>`;
   entries.forEach(([key, info]) => {
     const logoEl = info.logo
       ? `<img src="${info.logo}" alt="${info.name} logo" onerror="this.style.display='none'" loading="lazy">`
