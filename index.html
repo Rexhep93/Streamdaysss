@@ -14,12 +14,16 @@
   <link rel="stylesheet" href="style.css">
   <script>
     (function() {
-      const saved = localStorage.getItem('streamgids_theme') || 'dark';
-      if (saved === 'light') document.documentElement.dataset.theme = 'light';
+      const saved = localStorage.getItem('streamgids_theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
     })();
   </script>
 </head>
-<body>
+<body style="background:#111114;color:#f0f0f5">
 
 <!-- ── Top Header ── -->
 
