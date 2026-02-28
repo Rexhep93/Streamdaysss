@@ -38,7 +38,7 @@ body[data-theme="light"] .sc.active {
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-  background:radial-gradient(circle at top,#222225 0,#050509 55%);
+  background:radial-gradient(circle at top,#141420 0,#050509 55%);
   color:var(--t1); -webkit-font-smoothing:antialiased;
   padding-bottom: env(safe-area-inset-bottom);
 }
