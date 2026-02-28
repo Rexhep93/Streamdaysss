@@ -6,6 +6,20 @@ const TMDB_BASE  = ‘https://api.themoviedb.org/3’;
 const TMDB_IMG   = ‘https://image.tmdb.org/t/p/w300’;
 const OMDB_KEY   = ‘’;
 
+// ── Fetch with timeout ────────────────────────────────────────────────────────
+async function fetchWithTimeout(url, options = {}, ms = 8000) {
+const controller = new AbortController();
+const tid = setTimeout(() => controller.abort(), ms);
+try {
+const r = await fetch(url, { …options, signal: controller.signal });
+clearTimeout(tid);
+return r;
+} catch (e) {
+clearTimeout(tid);
+throw e;
+}
+}
+
 // ── Providers ─────────────────────────────────────────────────────────────────
 const WANTED_PROVIDERS = [
 { match: ‘netflix’,       key: ‘netflix’,     name: ‘Netflix’,        color: ‘#E50914’, text: ‘#fff’ },
@@ -80,14 +94,18 @@ let collapsedGroups = new Set();
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function applyTheme(theme) {
 if (theme === ‘light’) {
-document.documentElement.dataset.theme = ‘light’;
+document.documentElement.setAttribute(‘data-theme’, ‘light’);
+document.body.style.background = ‘’;
+document.body.style.color = ‘’;
 } else {
-delete document.documentElement.dataset.theme;
+document.documentElement.removeAttribute(‘data-theme’);
+document.body.style.background = ‘’;
+document.body.style.color = ‘’;
 }
 }
 
 function toggleTheme() {
-const isLight = document.documentElement.dataset.theme === ‘light’;
+const isLight = document.documentElement.getAttribute(‘data-theme’) === ‘light’;
 const next = isLight ? ‘dark’ : ‘light’;
 applyTheme(next);
 localStorage.setItem(‘streamgids_theme’, next);
@@ -191,7 +209,7 @@ url.searchParams.set(‘apiKey’, WM_KEY);
 Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 const cKey = ‘wm_’ + url.toString();
 const cached = scGet(cKey); if (cached) return cached;
-const r = await fetch(url.toString());
+const r = await fetchWithTimeout(url.toString(), {}, 10000);
 if (!r.ok) throw new Error(`Watchmode ${r.status}`);
 const data = await r.json(); scSet(cKey, data); return data;
 }
@@ -201,9 +219,9 @@ const url = new URL(TMDB_BASE + path);
 Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 const cKey = ‘tmdb_’ + url.toString();
 const cached = scGet(cKey); if (cached) return cached;
-const r = await fetch(url.toString(), {
+const r = await fetchWithTimeout(url.toString(), {
 headers: { ‘Authorization’: `Bearer ${TMDB_TOKEN}`, ‘Content-Type’: ‘application/json’ }
-});
+}, 8000);
 if (!r.ok) throw new Error(`TMDB ${r.status} (${path})`);
 const data = await r.json(); scSet(cKey, data); return data;
 }
@@ -326,21 +344,27 @@ tmdb_id: m.id, user_rating: m.vote_average || 0, overview: m.overview || ‘’,
 };
 }
 
-document.getElementById(‘loadSub’).textContent = ‘TMDB: actuele titels ophalen…’;
+const loadSub = document.getElementById(‘loadSub’);
+if (loadSub) loadSub.textContent = ‘TMDB: actuele titels ophalen…’;
+
+// Wrap single tmdb call with per-call timeout
+const tmdbSafe = (path, params) => Promise.race([
+tmdb(path, params),
+new Promise((_, rej) => setTimeout(() => rej(new Error(‘timeout’)), 6000)),
+]).catch(() => ({ results: [] }));
+
 try {
 const [nowMov, onAirTV] = await Promise.all([
-tmdbPages(’/movie/now_playing’, { language:‘nl-NL’, region:‘NL’ }, 5),
-tmdbPages(’/tv/on_the_air’,     { language:‘nl-NL’ }, 5),
+tmdbPages(’/movie/now_playing’, { language:‘nl-NL’, region:‘NL’ }, 2).catch(() => []),
+tmdbPages(’/tv/on_the_air’,     { language:‘nl-NL’ }, 2).catch(() => []),
 ]);
 const checkItems = [
-…nowMov.slice(0, 50).map(m => ({ …m, _isTV: false })),
-…onAirTV.slice(0, 50).map(t => ({ …t, _isTV: true })),
+…nowMov.slice(0, 25).map(m => ({ …m, _isTV: false })),
+…onAirTV.slice(0, 25).map(t => ({ …t, _isTV: true })),
 ];
-const batchSize = 10;
-for (let i = 0; i < checkItems.length; i += batchSize) {
-await Promise.all(checkItems.slice(i, i + batchSize).map(async m => {
+await Promise.all(checkItems.map(async m => {
 try {
-const pd = await tmdb(`/${m._isTV ? 'tv' : 'movie'}/${m.id}/watch/providers`);
+const pd = await tmdbSafe(`/${m._isTV ? 'tv' : 'movie'}/${m.id}/watch/providers`, {});
 const flat = pd?.results?.NL?.flatrate || [];
 for (const p of flat) {
 const prov = TMDB_NL_PROVIDERS[p.provider_id]; if (!prov) continue;
@@ -349,23 +373,22 @@ if (it) items.push(it);
 }
 } catch {}
 }));
-}
 } catch(e) { console.warn(‘TMDB now_playing/on_the_air:’, e); }
 
-const BATCH = 4;
+const BATCH = 6;
 for (let i = 0; i < providerEntries.length; i += BATCH) {
 const batch = providerEntries.slice(i, i + BATCH);
-document.getElementById(‘loadSub’).textContent = `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
+if (loadSub) loadSub.textContent = `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
 await Promise.all(batch.map(async ([id, prov]) => {
 const base = {
 watch_region: ‘NL’, with_watch_providers: id,
 with_watch_monetization_types: ‘flatrate’,
 language: ‘nl-NL’, sort_by: ‘popularity.desc’,
 };
-const cutoff = dateOffset(-1095);
+const cutoff = dateOffset(-730);
 const [movs, tvs] = await Promise.all([
-tmdbPages(’/discover/movie’, { …base, ‘primary_release_date.gte’: cutoff }, 5).catch(() => []),
-tmdbPages(’/discover/tv’,    { …base, ‘first_air_date.gte’: cutoff }, 5).catch(() => []),
+tmdbPages(’/discover/movie’, { …base, ‘primary_release_date.gte’: cutoff }, 2).catch(() => []),
+tmdbPages(’/discover/tv’,    { …base, ‘first_air_date.gte’: cutoff }, 2).catch(() => []),
 ]);
 movs.forEach(m => { const it = makeItem(m, prov, id, ‘movie’); if (it) items.push(it); });
 tvs.forEach(t  => { const it = makeItem(t, prov, id, ‘tv’);    if (it) items.push(it); });
@@ -1128,31 +1151,44 @@ async function init() {
 const savedTheme = localStorage.getItem(‘streamgids_theme’) || ‘dark’;
 applyTheme(savedTheme);
 
-try {
 const loadingText = document.querySelector(’.loading-text’);
 const loadSub = document.getElementById(‘loadSub’);
-if (loadingText) loadingText.textContent = ‘Streamingdiensten ophalen…’;
-if (loadSub) loadSub.textContent = ‘Watchmode + TMDB Nederland’;
+
+// Helper to timeout an entire phase
+const withTimeout = (promise, ms, fallback) =>
+Promise.race([promise, new Promise(res => setTimeout(() => res(fallback), ms))]);
+
+try {
+if (loadingText) loadingText.textContent = ‘Verbinden…’;
+if (loadSub) loadSub.textContent = ‘TMDB & Watchmode ophalen’;
 
 ```
-await Promise.all([
-  fetchWMSources().catch(e => console.warn('WM sources:', e)),
-  fetchTMDBProviders().catch(e => console.warn('TMDB providers:', e)),
-]);
+// Phase 1 – sources/providers (max 10s total)
+await withTimeout(Promise.all([
+  fetchWMSources().catch(() => {}),
+  fetchTMDBProviders().catch(() => {}),
+]), 10000, null);
 
-const tmdbCount = Object.keys(TMDB_NL_PROVIDERS).length;
 if (loadingText) loadingText.textContent = 'Releases laden…';
-if (loadSub) loadSub.textContent = `${wmSources.length} WM + ${tmdbCount} TMDB diensten`;
+if (loadSub) loadSub.textContent = 'Dit kan 15–30 seconden duren';
 
-const [wmItems, tmdbItems] = await Promise.all([
-  fetchWMReleases().catch(e => { console.warn('WM releases:', e); return []; }),
-  fetchTMDBReleases().catch(e => { console.warn('TMDB releases:', e); return []; }),
-]);
+// Phase 2 – releases (max 45s total; show whatever we have)
+const [wmItems, tmdbItems] = await withTimeout(
+  Promise.all([
+    fetchWMReleases().catch(e => { console.warn('WM:', e); return []; }),
+    fetchTMDBReleases().catch(e => { console.warn('TMDB:', e); return []; }),
+  ]),
+  45000,
+  [[], []]
+);
 
 if (loadSub) loadSub.textContent = '';
-allItems = mergeItems(wmItems, tmdbItems);
+allItems = mergeItems(
+  Array.isArray(wmItems) ? wmItems : [],
+  Array.isArray(tmdbItems) ? tmdbItems : []
+);
 
-if (!allItems.length) throw new Error('Geen releases gevonden voor Nederland.');
+if (!allItems.length) throw new Error('Geen releases gevonden. Controleer je verbinding en probeer opnieuw.');
 
 activeDayIso = todayISO();
 buildSvcStrip();
