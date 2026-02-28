@@ -1,6 +1,7 @@
 /* ── Reset & Variables ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Dark is the default — no class/attr needed */
 :root {
 –bg: #111114;
 –bg2: #18181d;
@@ -20,12 +21,16 @@
 html[data-theme=“light”] {
 –bg: #f2f2f7;
 –bg2: #ffffff;
-–bg3: #f8f8fa;
+–bg3: #f0f0f5;
 –card: #ffffff;
 –border: rgba(0,0,0,0.08);
 –t1: #1c1c1e;
 –t2: #48484a;
 –t3: #8e8e93;
+}
+
+html {
+background: #111114; /* prevent white flash before CSS vars load */
 }
 
 body {
