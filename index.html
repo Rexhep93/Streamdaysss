@@ -1,102 +1,94 @@
 <!DOCTYPE html>
 
-<html lang="nl">
+<html lang="nl" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <title>Streamgids</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="StreamGids" />
-  <meta name="theme-color" content="#0e0e18" />
+  <meta name="theme-color" content="#f2f2f7" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a2240'/%3E%3Cstop offset='100%25' stop-color='%230d1525'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='200' height='200' rx='42' fill='url(%23g)'/%3E%3Crect x='136' y='24' width='32' height='32' rx='6' fill='%2340e86a'/%3E%3Ctext x='100' y='116' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif' font-size='118' font-weight='800' fill='white' letter-spacing='-6'%3ESG%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css">
+  <script>
+    try {
+      var t = localStorage.getItem('streamgids_theme');
+      if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+      else document.documentElement.setAttribute('data-theme','light');
+    } catch(e) {}
+  </script>
 </head>
 <body>
+
 <div class="app">
-  <!-- Top Header -->
   <header class="top-header">
     <div class="header-left">
       <svg class="header-logo" width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <defs><linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a2240"/><stop offset="100%" style="stop-color:#0d1525"/></linearGradient></defs>
-        <rect width="200" height="200" rx="42" fill="url(#bgGrad)"/>
+        <defs><linearGradient id="bgG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1a2240"/><stop offset="100%" stop-color="#0d1525"/></linearGradient></defs>
+        <rect width="200" height="200" rx="42" fill="url(#bgG)"/>
         <rect x="138" y="26" width="30" height="30" rx="6" fill="#40e86a"/>
         <text x="100" y="116" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="120" font-weight="800" fill="white" letter-spacing="-6">SG</text>
       </svg>
-      <div class="header-brand">
-        <span class="brand-name">Stream<strong>gids</strong></span>
-      </div>
+      <span class="brand-name">Stream<strong>gids</strong></span>
     </div>
-    <div class="header-right">
-      <button class="header-icon-btn" onclick="toggleTheme()" aria-label="Thema wisselen">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      </button>
-    </div>
+    <button class="header-icon-btn" id="themeBtn" aria-label="Thema wisselen">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
   </header>
 
-  <!-- Date Tab Bar -->
-
   <div class="date-tabs" id="dateTabs"></div>
-
-  <!-- Service filter bar (hidden in top10/livesport) -->
-
-  <div id="svcBar" class="svc-bar"></div>
-
-  <!-- Main Content -->
+  <div class="svc-bar" id="svcBar"></div>
 
   <main id="main">
     <div class="loading-screen">
-      <div class="spinner"></div>
-      <div class="loading-text">Laden van de releases…</div>
-      <div class="loading-sub" id="loadSub"></div>
+      <div class="ld-spinner"></div>
+      <div class="ld-text" id="loadText">Laden…</div>
+      <div class="ld-sub" id="loadSub"></div>
     </div>
   </main>
 </div>
 
-<!-- Bottom Nav Bar -->
-
 <nav class="bottom-nav" id="bottomNav">
-  <button class="nav-item active" data-f="all" onclick="setType(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  <button class="bnav active" data-f="all">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <span>Alles</span>
   </button>
-  <button class="nav-item" data-f="movie" onclick="setType(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>
+  <button class="bnav" data-f="movie">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
     <span>Films</span>
   </button>
-  <button class="nav-item" data-f="tv" onclick="setType(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+  <button class="bnav" data-f="tv">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
     <span>Series</span>
   </button>
-  <button class="nav-item" data-f="top10" onclick="setType(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  <button class="bnav" data-f="top10">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     <span>Top 10</span>
   </button>
-  <button class="nav-item" data-f="livesport" onclick="setType(this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
-    <span>Live Sport</span>
+  <button class="bnav" data-f="livesport">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+    <span>Sport</span>
   </button>
 </nav>
 
-<!-- Detail Modal -->
-
-<div id="overlay" onclick="closeBg(event)" role="dialog" aria-modal="true">
-  <div class="sheet">
+<div id="overlay">
+  <div class="sheet" id="sheetEl">
     <div class="drag"></div>
-    <div id="si" class="sheet-header"></div>
+    <div id="si"></div>
     <div id="sd" class="sheet-body"></div>
-    <div id="ratingsRow" class="ratings-row" style="display:none"></div>
+    <div id="ratingsRow" class="ratings-row"></div>
     <a id="wb" class="watch-btn" href="#" target="_blank" rel="noopener noreferrer" style="display:none">
       <img id="wbLogo" src="" alt="" style="width:20px;height:20px;border-radius:4px;object-fit:cover;display:none" onerror="this.style.display='none'">
-      <span id="wbLabel">▶ Kijken</span>
+      <span id="wbLabel">Kijken</span>
     </a>
-    <button id="shareBtn" class="share-btn" onclick="shareItem()" style="display:none">Delen</button>
+    <button id="shareBtn" class="share-btn" style="display:none">Delen</button>
   </div>
 </div>
 
-<script src="script.js" defer></script>
+<script src="script.js"></script>
 
 </body>
 </html>
