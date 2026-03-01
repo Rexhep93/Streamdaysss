@@ -6,20 +6,6 @@ const TMDB_BASE  = ‘https://api.themoviedb.org/3’;
 const TMDB_IMG   = ‘https://image.tmdb.org/t/p/w300’;
 const OMDB_KEY   = ‘’;
 
-// ── Fetch with timeout ────────────────────────────────────────────────────────
-async function fetchWithTimeout(url, options = {}, ms = 8000) {
-const controller = new AbortController();
-const tid = setTimeout(() => controller.abort(), ms);
-try {
-const r = await fetch(url, { …options, signal: controller.signal });
-clearTimeout(tid);
-return r;
-} catch (e) {
-clearTimeout(tid);
-throw e;
-}
-}
-
 // ── Providers ─────────────────────────────────────────────────────────────────
 const WANTED_PROVIDERS = [
 { match: ‘netflix’,       key: ‘netflix’,     name: ‘Netflix’,        color: ‘#E50914’, text: ‘#fff’ },
@@ -85,82 +71,43 @@ let allItems = [];
 let typeFilter = ‘all’, svcFilter = ‘all’;
 const detailCache = {};
 const imgCache = {};
-let allDays = [], activeDayIso = ‘’;
+let allDays = [];
+let selectedDate = null; // currently selected date ISO
 let wmSources = [], wmSourceMap = {};
 let currentModalItem = null;
-let searchMode = false, searchQuery = ‘’;
-let collapsedGroups = new Set();
+const collapsedSections = new Set();
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function applyTheme(theme) {
 if (theme === ‘light’) {
-document.documentElement.setAttribute(‘data-theme’, ‘light’);
-document.body.style.background = ‘’;
-document.body.style.color = ‘’;
+document.body.dataset.theme = ‘light’;
 } else {
-document.documentElement.removeAttribute(‘data-theme’);
-document.body.style.background = ‘’;
-document.body.style.color = ‘’;
+delete document.body.dataset.theme;
 }
 }
-
 function toggleTheme() {
-const isLight = document.documentElement.getAttribute(‘data-theme’) === ‘light’;
-const next = isLight ? ‘dark’ : ‘light’;
+const next = document.body.dataset.theme === ‘light’ ? ‘dark’ : ‘light’;
 applyTheme(next);
 localStorage.setItem(‘streamgids_theme’, next);
 }
-
-// ── Search ────────────────────────────────────────────────────────────────────
-function toggleSearch() {
-const wrap = document.getElementById(‘searchWrap’);
-const input = document.getElementById(‘searchInput’);
-const dateWrap = document.getElementById(‘dateStripWrap’);
-const svcWrap = document.getElementById(‘svcStripWrap’);
-
-if (wrap.style.display === ‘none’) {
-wrap.style.display = ‘block’;
-dateWrap.style.display = ‘none’;
-svcWrap.style.display = ‘none’;
-searchMode = true;
-input.focus();
+// Apply on load
+(function() {
+const saved = localStorage.getItem(‘streamgids_theme’);
+if (!saved || saved === ‘light’) {
+document.body.dataset.theme = ‘light’;
 } else {
-wrap.style.display = ‘none’;
-dateWrap.style.display = ‘’;
-svcWrap.style.display = ‘’;
-searchMode = false;
-searchQuery = ‘’;
-input.value = ‘’;
-renderActiveView();
+delete document.body.dataset.theme;
 }
-}
+})();
 
-function onSearch(q) {
-searchQuery = q.trim().toLowerCase();
-renderSearch();
-}
-
-function renderSearch() {
-const main = document.getElementById(‘main’);
-if (!searchQuery) {
-main.innerHTML = `<div class="search-empty">Typ om te zoeken in films & series.</div>`;
-return;
-}
-const results = allItems.filter(i => (i.title || ‘’).toLowerCase().includes(searchQuery));
-if (!results.length) {
-main.innerHTML = `<div class="search-empty">Geen resultaten voor "<strong>${searchQuery}</strong>".</div>`;
-return;
-}
-main.innerHTML = `<div class="search-results-wrap">${results.map(releaseRowHtml).join('')}</div>`;
-}
-
-// ── Share ─────────────────────────────────────────────────────────────────────
+// ── Web Share ─────────────────────────────────────────────────────────────────
 async function shareItem() {
 if (!currentModalItem) return;
 const title = currentModalItem.title || ‘StreamGids’;
 const text = `Bekijk "${title}" via StreamGids`;
 if (navigator.share) {
-try { await navigator.share({ title, text, url: window.location.href }); } catch {}
+try { await navigator.share({ title, text, url: window.location.href }); }
+catch(e) { console.log(‘Delen geannuleerd:’, e); }
 } else {
 window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, ‘_blank’);
 }
@@ -174,7 +121,7 @@ function scSet(key, val) {
 try { sessionStorage.setItem(key, JSON.stringify(val)); } catch {}
 }
 
-// ── Datum helpers ─────────────────────────────────────────────────────────────
+// ── Date helpers ──────────────────────────────────────────────────────────────
 function dateOffset(offset) {
 const d = new Date(); d.setDate(d.getDate() + offset);
 return d.toISOString().slice(0, 10);
@@ -187,19 +134,31 @@ if (s.includes(’-’)) return s.slice(0, 10);
 return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
 }
 function todayISO() { return new Date().toISOString().slice(0, 10); }
-function dayName(iso) {
-const n = new Date(iso + ‘T12:00:00’).toLocaleDateString(‘nl-NL’, { weekday: ‘long’ });
-return n.charAt(0).toUpperCase() + n.slice(1);
+function dayNameShort(iso) {
+const d = new Date(iso + ‘T12:00:00’);
+return d.toLocaleDateString(‘nl-NL’, { weekday: ‘short’ }).replace(/^\w/, c => c.toUpperCase());
 }
-function shortDayName(iso) {
-const n = new Date(iso + ‘T12:00:00’).toLocaleDateString(‘nl-NL’, { weekday: ‘short’ });
-return n.charAt(0).toUpperCase() + n.slice(1);
+function dayNameFull(iso) {
+const d = new Date(iso + ‘T12:00:00’);
+return d.toLocaleDateString(‘nl-NL’, { weekday: ‘long’ }).replace(/^\w/, c => c.toUpperCase());
 }
-function dayNumber(iso) {
+function dayNum(iso) {
 return new Date(iso + ‘T12:00:00’).getDate();
+}
+function monthShort(iso) {
+return new Date(iso + ‘T12:00:00’).toLocaleDateString(‘nl-NL’, { month: ‘short’ }).replace(/^\w/, c => c.toUpperCase());
 }
 function fullDate(iso) {
 return new Date(iso + ‘T12:00:00’).toLocaleDateString(‘nl-NL’, { day:‘numeric’, month:‘long’, year:‘numeric’ });
+}
+function getDateLabel(iso) {
+const today = todayISO();
+const yesterday = dateOffset(-1);
+const tomorrow = dateOffset(1);
+if (iso === today) return ‘Vandaag’;
+if (iso === yesterday) return ‘Gisteren’;
+if (iso === tomorrow) return ‘Morgen’;
+return dayNameShort(iso);
 }
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -209,7 +168,7 @@ url.searchParams.set(‘apiKey’, WM_KEY);
 Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 const cKey = ‘wm_’ + url.toString();
 const cached = scGet(cKey); if (cached) return cached;
-const r = await fetchWithTimeout(url.toString(), {}, 10000);
+const r = await fetch(url.toString());
 if (!r.ok) throw new Error(`Watchmode ${r.status}`);
 const data = await r.json(); scSet(cKey, data); return data;
 }
@@ -219,9 +178,9 @@ const url = new URL(TMDB_BASE + path);
 Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 const cKey = ‘tmdb_’ + url.toString();
 const cached = scGet(cKey); if (cached) return cached;
-const r = await fetchWithTimeout(url.toString(), {
+const r = await fetch(url.toString(), {
 headers: { ‘Authorization’: `Bearer ${TMDB_TOKEN}`, ‘Content-Type’: ‘application/json’ }
-}, 8000);
+});
 if (!r.ok) throw new Error(`TMDB ${r.status} (${path})`);
 const data = await r.json(); scSet(cKey, data); return data;
 }
@@ -344,27 +303,21 @@ tmdb_id: m.id, user_rating: m.vote_average || 0, overview: m.overview || ‘’,
 };
 }
 
-const loadSub = document.getElementById(‘loadSub’);
-if (loadSub) loadSub.textContent = ‘TMDB: actuele titels ophalen…’;
-
-// Wrap single tmdb call with per-call timeout
-const tmdbSafe = (path, params) => Promise.race([
-tmdb(path, params),
-new Promise((_, rej) => setTimeout(() => rej(new Error(‘timeout’)), 6000)),
-]).catch(() => ({ results: [] }));
-
+document.getElementById(‘loadSub’).textContent = ‘TMDB: actuele titels ophalen…’;
 try {
 const [nowMov, onAirTV] = await Promise.all([
-tmdbPages(’/movie/now_playing’, { language:‘nl-NL’, region:‘NL’ }, 2).catch(() => []),
-tmdbPages(’/tv/on_the_air’,     { language:‘nl-NL’ }, 2).catch(() => []),
+tmdbPages(’/movie/now_playing’, { language:‘nl-NL’, region:‘NL’ }, 5),
+tmdbPages(’/tv/on_the_air’,     { language:‘nl-NL’ }, 5),
 ]);
 const checkItems = [
-…nowMov.slice(0, 25).map(m => ({ …m, _isTV: false })),
-…onAirTV.slice(0, 25).map(t => ({ …t, _isTV: true })),
+…nowMov.slice(0, 50).map(m => ({ …m, _isTV: false })),
+…onAirTV.slice(0, 50).map(t => ({ …t, _isTV: true })),
 ];
-await Promise.all(checkItems.map(async m => {
+const batchSize = 10;
+for (let i = 0; i < checkItems.length; i += batchSize) {
+await Promise.all(checkItems.slice(i, i + batchSize).map(async m => {
 try {
-const pd = await tmdbSafe(`/${m._isTV ? 'tv' : 'movie'}/${m.id}/watch/providers`, {});
+const pd = await tmdb(`/${m._isTV ? 'tv' : 'movie'}/${m.id}/watch/providers`);
 const flat = pd?.results?.NL?.flatrate || [];
 for (const p of flat) {
 const prov = TMDB_NL_PROVIDERS[p.provider_id]; if (!prov) continue;
@@ -373,22 +326,23 @@ if (it) items.push(it);
 }
 } catch {}
 }));
+}
 } catch(e) { console.warn(‘TMDB now_playing/on_the_air:’, e); }
 
-const BATCH = 6;
+const BATCH = 4;
 for (let i = 0; i < providerEntries.length; i += BATCH) {
 const batch = providerEntries.slice(i, i + BATCH);
-if (loadSub) loadSub.textContent = `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
+document.getElementById(‘loadSub’).textContent = `TMDB: ${batch.map(([,p]) => p.name).join(', ')}…`;
 await Promise.all(batch.map(async ([id, prov]) => {
 const base = {
 watch_region: ‘NL’, with_watch_providers: id,
 with_watch_monetization_types: ‘flatrate’,
 language: ‘nl-NL’, sort_by: ‘popularity.desc’,
 };
-const cutoff = dateOffset(-730);
+const cutoff = dateOffset(-1095);
 const [movs, tvs] = await Promise.all([
-tmdbPages(’/discover/movie’, { …base, ‘primary_release_date.gte’: cutoff }, 2).catch(() => []),
-tmdbPages(’/discover/tv’,    { …base, ‘first_air_date.gte’: cutoff }, 2).catch(() => []),
+tmdbPages(’/discover/movie’, { …base, ‘primary_release_date.gte’: cutoff }, 5).catch(() => []),
+tmdbPages(’/discover/tv’,    { …base, ‘first_air_date.gte’: cutoff }, 5).catch(() => []),
 ]);
 movs.forEach(m => { const it = makeItem(m, prov, id, ‘movie’); if (it) items.push(it); });
 tvs.forEach(t  => { const it = makeItem(t, prov, id, ‘tv’);    if (it) items.push(it); });
@@ -398,7 +352,7 @@ tvs.forEach(t  => { const it = makeItem(t, prov, id, ‘tv’);    if (it) items
 return items;
 }
 
-// ── Merge & dedup ─────────────────────────────────────────────────────────────
+// ── Merge & deduplicate ───────────────────────────────────────────────────────
 function mergeItems(wmItems, tmdbItems) {
 const result = [], seen = new Set();
 for (const item of wmItems) {
@@ -417,93 +371,88 @@ if (seen.has(titleKey)) continue; seen.add(titleKey); result.push(item);
 return result;
 }
 
-// ── Date tabs (FotMob style) ──────────────────────────────────────────────────
-function buildDateStrip() {
-const strip = document.getElementById(‘dateStrip’);
-const today = todayISO();
-
-// Build range: 7 days back, today, 14 days ahead
-const days = [];
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── DATE TAB BAR (FotMob style) ──────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+function buildDateTabs() {
+const container = document.getElementById(‘dateTabs’);
+// Build range: -7 to +14 days
+allDays = [];
 for (let i = -7; i <= 14; i++) {
-days.push(dateOffset(i));
+allDays.push(dateOffset(i));
 }
-
-// Also include all days that have items
-const itemDays = new Set(filteredItems().map(i => i._date).filter(Boolean));
+// Also include any days from items that are outside this range
+const itemDays = new Set(allItems.filter(i => i._date).map(i => i._date));
 itemDays.forEach(d => {
-if (!days.includes(d)) days.push(d);
+if (!allDays.includes(d)) allDays.push(d);
 });
-days.sort();
-allDays = days;
+allDays.sort();
 
-if (!activeDayIso || !days.includes(activeDayIso)) {
-activeDayIso = today;
-}
+if (!selectedDate) selectedDate = todayISO();
 
-strip.innerHTML = days.map(iso => {
-const isToday = iso === today;
-const isActive = iso === activeDayIso;
-const itemsOnDay = filteredItems().filter(i => i._date === iso).length;
-const hasItems = itemsOnDay > 0;
-
-```
-let label;
-if (isToday) label = 'Vandaag';
-else if (iso === dateOffset(-1)) label = 'Gisteren';
-else if (iso === dateOffset(1)) label = 'Morgen';
-else label = shortDayName(iso);
-
-return `<button class="date-tab${isActive ? ' active' : ''}${isToday ? ' is-today' : ''}" 
-  onclick="selectDay('${iso}')" title="${fullDate(iso)}">
-  <div class="dt-weekday">${label}</div>
-  <div class="dt-day">${dayNumber(iso)}</div>
-  <div class="dt-underline"></div>
-</button>`;
-```
-
+container.innerHTML = allDays.map(iso => {
+const label = getDateLabel(iso);
+const isToday = iso === todayISO();
+const isActive = iso === selectedDate;
+const sub = isToday ? ‘’ : `<span class="tab-day">${dayNum(iso)} ${monthShort(iso)}</span>`;
+return `<button class="date-tab${isActive ? ' active' : ''}${isToday ? ' today-tab' : ''}" data-date="${iso}" onclick="selectDate('${iso}')">${label}${sub}</button>`;
 }).join(’’);
 
-// Scroll active tab into view
-setTimeout(() => {
-const activeBtn = strip.querySelector(’.date-tab.active’);
-if (activeBtn) activeBtn.scrollIntoView({ behavior: ‘smooth’, block: ‘nearest’, inline: ‘center’ });
-}, 50);
+// Scroll to active tab
+requestAnimationFrame(() => {
+const active = container.querySelector(’.date-tab.active’);
+if (active) {
+active.scrollIntoView({ behavior: ‘smooth’, inline: ‘center’, block: ‘nearest’ });
+}
+});
 }
 
-function selectDay(iso) {
-activeDayIso = iso;
-buildDateStrip();
-renderDayContent();
+function selectDate(iso) {
+selectedDate = iso;
+// Update tab active states
+document.querySelectorAll(’.date-tab’).forEach(t => {
+t.classList.toggle(‘active’, t.dataset.date === iso);
+});
+renderMain();
 }
 
-// ── Service filter strip ───────────────────────────────────────────────────────
-function buildSvcStrip() {
-const strip = document.getElementById(‘svcStrip’);
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── SERVICE BAR ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+function buildSvcBar() {
+const bar = document.getElementById(‘svcBar’);
 const provMap = new Map();
 for (const item of allItems) {
-const key = item._key || ‘’;
-if (provMap.has(key)) continue;
+const key = item._key || ‘’; if (provMap.has(key)) continue;
 provMap.set(key, { name: item._src?.name || key, style: item._style, logo: item._src?.logo_100px || null });
 }
 const entries = […provMap.entries()].sort((a, b) => {
-const ra = POPULAR_KEYS.indexOf(String(a[0]).toLowerCase());
-const rb = POPULAR_KEYS.indexOf(String(b[0]).toLowerCase());
-if (ra !== -1 && rb === -1) return -1;
-if (ra === -1 && rb !== -1) return 1;
-if (ra !== rb) return ra - rb;
+const keyA = String(a[0]).toLowerCase(), keyB = String(b[0]).toLowerCase();
+const rankA = POPULAR_KEYS.indexOf(keyA) === -1 ? 999 : POPULAR_KEYS.indexOf(keyA);
+const rankB = POPULAR_KEYS.indexOf(keyB) === -1 ? 999 : POPULAR_KEYS.indexOf(keyB);
+if (rankA !== rankB) return rankA - rankB;
 return a[1].name.localeCompare(b[1].name);
 });
-
-strip.innerHTML = `<button class="svc-chip${svcFilter==='all'?' active':''}" data-k="all" onclick="setSvc(this)">Alle</button>`;
+bar.innerHTML = `<button class="sc active" data-k="all" onclick="setSvc(this)">Alle diensten</button>`;
 entries.forEach(([key, info]) => {
 const logoEl = info.logo
 ? `<img src="${info.logo}" alt="${info.name}" onerror="this.style.display='none'" loading="lazy">`
-: `<div class="chip-dot" style="background:${info.style.color}"></div>`;
-strip.innerHTML += `<button class="svc-chip${svcFilter===key?' active':''}" data-k="${key}" onclick="setSvc(this)">${logoEl}${info.name}</button>`;
+: `<div class="dot" style="background:${info.style.color}"></div>`;
+bar.innerHTML += `<button class="sc${svcFilter===key?' active':''}" data-k="${key}" onclick="setSvc(this)">${logoEl}${info.name}</button>`;
 });
 }
 
-// ── Filters ───────────────────────────────────────────────────────────────────
+function setSvc(el) {
+svcFilter = el.dataset.k;
+document.querySelectorAll(’.sc’).forEach(c => c.classList.remove(‘active’));
+el.classList.add(‘active’);
+renderMain();
+enrichMissingPosters();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── MAIN RENDERING (FotMob grouped-by-service) ──────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 function filteredItems() {
 return allItems.filter(i => {
 if (typeFilter === ‘movie’ && i._type !== ‘movie’) return false;
@@ -513,101 +462,107 @@ return !!i._date;
 });
 }
 
-// ── Render: grouped by service (FotMob league style) ─────────────────────────
-function renderDayContent() {
+function renderMain() {
 const main = document.getElementById(‘main’);
-const items = filteredItems().filter(i => i._date === activeDayIso);
-const today = todayISO();
+main.innerHTML = ‘’;
+
+const items = filteredItems().filter(i => i._date === selectedDate);
 
 if (!items.length) {
-main.innerHTML = ` <div class="day-label-bar"> <span class="day-label-name">${dayName(activeDayIso)}</span> ${activeDayIso === today ? '<span class="day-label-today">Vandaag</span>' : ''} </div> <div class="empty-day">Geen nieuwe releases op ${activeDayIso === today ? 'vandaag' : 'deze dag'}.</div>`;
+main.innerHTML = ` <div class="empty-state"> <div style="font-size:28px;margin-bottom:8px">📺</div> <div>Geen releases op ${getDateLabel(selectedDate).toLowerCase()}${selectedDate !== todayISO() ? ' (' + fullDate(selectedDate) + ')' : ''}.</div> <div style="margin-top:4px;font-size:12px;color:var(--t3)">Probeer een andere dag of filter.</div> </div>`;
 return;
 }
 
 // Group by service
-const groupMap = new Map();
-for (const item of items) {
+const svcGroups = new Map();
+items.forEach(item => {
 const key = item._key || ‘overig’;
-if (!groupMap.has(key)) groupMap.set(key, { info: null, items: [] });
-const g = groupMap.get(key);
-if (!g.info) g.info = { name: (item._src?.name || key).replace(/Netherlands/gi,’’).trim(), color: item._style.color, logo: item._src?.logo_100px || null };
-g.items.push(item);
+if (!svcGroups.has(key)) {
+svcGroups.set(key, {
+name: item._src?.name || key,
+logo: item._src?.logo_100px || null,
+color: item._style?.color || ‘#444’,
+items: []
+});
 }
-
-// Sort groups by popularity
-const sortedGroups = […groupMap.entries()].sort((a, b) => {
-const ra = POPULAR_KEYS.indexOf(a[0]);
-const rb = POPULAR_KEYS.indexOf(b[0]);
-if (ra !== -1 && rb === -1) return -1;
-if (ra === -1 && rb !== -1) return 1;
-if (ra !== rb) return ra - rb;
-return a[1].info.name.localeCompare(b[1].info.name);
+svcGroups.get(key).items.push(item);
 });
 
-const totalCount = items.length;
-let html = ` <div class="day-label-bar"> <span class="day-label-name">${dayName(activeDayIso)}</span> ${activeDayIso === today ? '<span class="day-label-today">Vandaag</span>' : ''} <span class="day-label-count">${totalCount} titel${totalCount !== 1 ? 's' : ''}</span> </div>`;
+// Sort services by popularity
+const sorted = […svcGroups.entries()].sort((a, b) => {
+const rankA = POPULAR_KEYS.indexOf(a[0]) === -1 ? 999 : POPULAR_KEYS.indexOf(a[0]);
+const rankB = POPULAR_KEYS.indexOf(b[0]) === -1 ? 999 : POPULAR_KEYS.indexOf(b[0]);
+if (rankA !== rankB) return rankA - rankB;
+return b[1].items.length - a[1].items.length;
+});
 
-for (const [key, group] of sortedGroups) {
-const isCollapsed = collapsedGroups.has(key);
-const logoEl = group.info.logo
-? `<img class="sgh-logo" src="${group.info.logo}" alt="${group.info.name}" onerror="this.style.display='none'" loading="lazy">`
-: `<div class="sgh-dot" style="background:${group.info.color}"></div>`;
+sorted.forEach(([key, group], idx) => {
+const sec = document.createElement(‘div’);
+sec.className = `svc-section${collapsedSections.has(key) ? ' collapsed' : ''}`;
+sec.style.animationDelay = `${idx * 0.04}s`;
+sec.id = `svc-${key}`;
 
 ```
-html += `
-  <div class="svc-group${isCollapsed ? ' collapsed' : ''}" id="grp-${key.replace(/[^a-z0-9]/g,'-')}">
-    <div class="svc-group-header" onclick="toggleGroup('${key.replace(/'/g,"\\'")}')">
-      ${logoEl}
-      <span class="sgh-name">${group.info.name}</span>
-      <span class="sgh-count">${group.items.length}</span>
-      <span class="sgh-arrow">▾</span>
-    </div>
-    <div class="svc-group-body">
-      ${group.items.map(releaseRowHtml).join('')}
-    </div>
+const logoHtml = group.logo
+  ? `<img class="svc-section-logo" src="${group.logo}" alt="${group.name}" onerror="this.style.display='none'" loading="lazy">`
+  : `<div class="svc-section-dot" style="background:${group.color}">${group.name.charAt(0)}</div>`;
+
+const movCount = group.items.filter(i => i._type === 'movie').length;
+const tvCount = group.items.filter(i => i._type === 'tv').length;
+const countParts = [];
+if (movCount) countParts.push(`${movCount} film${movCount > 1 ? 's' : ''}`);
+if (tvCount) countParts.push(`${tvCount} serie${tvCount > 1 ? 's' : ''}`);
+
+sec.innerHTML = `
+  <div class="svc-section-header" onclick="toggleSection('${key}')">
+    ${logoHtml}
+    <div class="svc-section-name">${group.name}</div>
+    <div class="svc-section-count">${countParts.join(' · ')}</div>
+    <svg class="svc-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+  <div class="svc-section-body">
+    ${group.items.map(item => contentRowHtml(item)).join('')}
   </div>`;
+
+main.appendChild(sec);
 ```
 
+});
 }
 
-main.innerHTML = html;
-}
-
-function toggleGroup(key) {
-if (collapsedGroups.has(key)) {
-collapsedGroups.delete(key);
-} else {
-collapsedGroups.add(key);
-}
-const safeKey = key.replace(/[^a-z0-9]/g, ‘-’);
-const el = document.getElementById(`grp-${safeKey}`);
-if (el) el.classList.toggle(‘collapsed’);
-}
-
-// ── Release Row (single item row) ─────────────────────────────────────────────
-function releaseRowHtml(item) {
+function contentRowHtml(item) {
 const title = (item.title || ‘’).replace(/’/g, “'”).replace(/”/g, ‘"’);
 const safeId = String(item.id).replace(/[’”\]/g, ‘’);
 const posterSrc = imgCache[item.id] || item.img || ‘’;
-const typeLabel = item._type === ‘movie’ ? ‘FILM’ : ‘SERIE’;
-const seasonLabel = (item._type === ‘tv’ && item._season) ? ` S${item._season}` : ‘’;
-const rating = item.user_rating ? Number(item.user_rating).toFixed(1) : ‘’;
-const genre = item.genres?.[0]?.name || (item._type === ‘movie’ ? ‘Film’ : ‘Serie’);
+const typeLabel = item._type === ‘movie’ ? ‘Film’ : ‘Serie’;
+const typeCls = item._type === ‘movie’ ? ‘movie’ : ‘tv’;
+const seasonLabel = (item._type === ‘tv’ && item._season) ? ` · S${item._season}` : ‘’;
+const svcName = (item._src?.name || ‘Streaming’).replace(/Netherlands/gi,’’).trim();
 
-return `<div class="release-row" onclick="openModal('${safeId}')" role="button" aria-label="${title}"> <div class="rr-poster"> ${posterSrc ?`<img src="${posterSrc}" alt="Poster" loading="lazy" onerror="cardImgError(this,'${safeId}')">`:`<div class="rr-fallback" id="fallback-${safeId}">${title}</div>`} <div class="rr-type-pill">${typeLabel}${seasonLabel}</div> </div> <div class="rr-info"> <div class="rr-title">${title}</div> <div class="rr-meta">${genre}</div> </div> <div class="rr-right"> ${rating ? `<div class="rr-imdb">IMDb ${rating}</div>` : ''} </div> </div>`;
+return `<div class="content-row" onclick="openModal('${safeId}')"> <div class="row-poster"> ${posterSrc ?`<img src="${posterSrc}" alt="${title}" loading="lazy" onerror="cardImgError(this,'${safeId}')">`:`<div class="poster-fallback" id="fallback-${safeId}">${title}</div>`} </div> <div class="row-info"> <div class="row-title">${title}</div> <div class="row-meta">${typeLabel}${seasonLabel} · ${svcName}</div> </div> <div class="row-right"> <div class="row-type ${typeCls}">${typeLabel}</div> </div> </div>`;
 }
 
-// ── Image fallback helpers ────────────────────────────────────────────────────
+function toggleSection(key) {
+if (collapsedSections.has(key)) {
+collapsedSections.delete(key);
+} else {
+collapsedSections.add(key);
+}
+const sec = document.getElementById(`svc-${key}`);
+if (sec) sec.classList.toggle(‘collapsed’);
+}
+
+// ── Poster fallback ───────────────────────────────────────────────────────────
 async function cardImgError(imgEl, itemId) {
 imgEl.style.display = ‘none’;
-const fallback = document.getElementById(`fallback-${itemId}`);
+const fallback = imgEl.nextElementSibling;
 if (fallback) fallback.style.display = ‘flex’;
 if (imgCache[itemId]) {
 imgEl.src = imgCache[itemId]; imgEl.style.display = ‘block’;
 if (fallback) fallback.style.display = ‘none’; return;
 }
 const item = allItems.find(i => String(i.id) === String(itemId));
-if (!item?.title) return;
+if (!item || !item.title) return;
 try {
 const type = item._type === ‘movie’ ? ‘movie’ : ‘tv’;
 const res = await tmdb(`/search/${type}`, { query: item.title, language: ‘nl-NL’ });
@@ -633,12 +588,14 @@ const hit = (res.results || []).find(r => r.poster_path);
 if (!hit?.poster_path) return;
 const url = `${TMDB_IMG}${hit.poster_path}`;
 imgCache[item.id] = url; item.img = url;
-const fallbackEl = document.getElementById(`fallback-${String(item.id).replace(/['"\\]/g,'')}`);
+const safeId = String(item.id).replace(/[’”\]/g, ‘’);
+const fallbackEl = document.getElementById(`fallback-${safeId}`);
 if (fallbackEl) {
-const poster = fallbackEl.closest(’.rr-poster’);
+const poster = fallbackEl.closest(’.row-poster’);
 if (poster) {
 const img = document.createElement(‘img’);
 img.src = url; img.alt = item.title; img.loading = ‘lazy’;
+img.onerror = () => {};
 poster.insertBefore(img, fallbackEl);
 fallbackEl.style.display = ‘none’;
 }
@@ -648,46 +605,35 @@ fallbackEl.style.display = ‘none’;
 }
 }
 
-// ── Render dispatch ───────────────────────────────────────────────────────────
-function renderActiveView() {
-if (searchMode) { renderSearch(); return; }
-if (typeFilter === ‘top10’) { renderTop10(); return; }
-if (typeFilter === ‘livesport’) { renderLiveSport(); return; }
-buildDateStrip();
-renderDayContent();
-}
-
-// ── Type filter (bottom nav) ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── BOTTOM NAV / TYPE FILTER ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 function setType(el) {
 typeFilter = el.dataset.f;
-document.querySelectorAll(’.bnav-item’).forEach(b => b.classList.remove(‘active’));
+document.querySelectorAll(’.nav-item’).forEach(n => n.classList.remove(‘active’));
 el.classList.add(‘active’);
 
-const dateWrap = document.getElementById(‘dateStripWrap’);
-const svcWrap = document.getElementById(‘svcStripWrap’);
+const dateTabs = document.getElementById(‘dateTabs’);
+const svcBar = document.getElementById(‘svcBar’);
 
-if (typeFilter === ‘top10’ || typeFilter === ‘livesport’) {
-dateWrap.style.display = ‘none’;
-svcWrap.style.display = ‘none’;
-renderActiveView();
+if (typeFilter === ‘top10’) {
+dateTabs.style.display = ‘none’;
+svcBar.style.display = ‘none’;
+renderTop10();
+} else if (typeFilter === ‘livesport’) {
+dateTabs.style.display = ‘none’;
+svcBar.style.display = ‘none’;
+renderLiveSport();
 } else {
-dateWrap.style.display = ‘’;
-svcWrap.style.display = ‘’;
-buildDateStrip();
-renderDayContent();
+dateTabs.style.display = ‘’;
+svcBar.style.display = ‘’;
+renderMain();
 }
 }
 
-function setSvc(el) {
-svcFilter = el.dataset.k;
-document.querySelectorAll(’.svc-chip’).forEach(c => c.classList.remove(‘active’));
-el.classList.add(‘active’);
-buildDateStrip();
-renderDayContent();
-enrichMissingPosters();
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── MODAL ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 async function openModal(rawId) {
 const overlay    = document.getElementById(‘overlay’);
 const si         = document.getElementById(‘si’);
@@ -707,7 +653,8 @@ const initPoster = imgCache[item.id] || img || ‘’;
 
 si.innerHTML = `<div class="sp">${initPoster ?`<img src="${initPoster}" alt="">` : ''}</div> <div class="sinf"> <div class="ssvc" style="color:${color}">${svcName}</div> <div class="stitle">${title}</div> <div class="smeta">${_type === 'movie' ? 'Film' : 'Serie'} · laden…</div> </div>`;
 
-sd.textContent = item.overview || ‘Beschrijving laden…’;
+const immediateOverview = item.overview || ‘’;
+sd.textContent = immediateOverview || ‘Beschrijving laden…’;
 ratingsRow.style.display = ‘none’;
 ratingsRow.innerHTML = ‘’;
 wb.style.display = ‘none’;
@@ -716,7 +663,7 @@ overlay.classList.add(‘open’);
 document.body.style.overflow = ‘hidden’;
 
 let fullTitle = title, year = ‘’, runtime = ‘’, rating = ‘’, genres = ‘’;
-let rawOverview = item.overview || ‘’;
+let rawOverview = immediateOverview;
 let watchLink = null, imdbId = null;
 let seasonInfo = item._season ? `Seizoen ${item._season}` : ‘’;
 let posterUrl = initPoster;
@@ -737,7 +684,7 @@ tmdb(`${path}/watch/providers`),
 tmdb(`${path}/external_ids`).catch(() => ({})),
 ]);
 detailCache[cKey] = { det, prov, extIds };
-} catch(e) { detailCache[cKey] = null; }
+} catch(e) { console.warn(‘TMDB detail:’, e); detailCache[cKey] = null; }
 }
 const cached = detailCache[cKey];
 if (cached?.det) {
@@ -750,6 +697,7 @@ genres       = (d.genres || []).slice(0, 4).map(g => `<span class="stag">${g.nam
 if (d.overview) rawOverview = d.overview;
 if (_type === ‘tv’ && d.number_of_seasons) {
 seasonInfo = `${d.number_of_seasons} seizoen${d.number_of_seasons > 1 ? 'en' : ''}`;
+if (!item._season) item._season = d.number_of_seasons;
 }
 if (d.poster_path) {
 posterUrl = `${TMDB_IMG}${d.poster_path}`;
@@ -770,9 +718,9 @@ catch { detailCache[wKey] = null; }
 }
 const d = detailCache[wKey];
 if (d) {
-if (!year)       year    = d.year ? String(d.year) : year;
-if (!runtime)    runtime = d.runtime_minutes ? `${d.runtime_minutes} min` : ‘’;
-if (!tmdbRating) tmdbRating = d.user_rating || 0;
+if (!year)        year    = d.year ? String(d.year) : year;
+if (!runtime)     runtime = d.runtime_minutes ? `${d.runtime_minutes} min` : ‘’;
+if (!tmdbRating)  tmdbRating = d.user_rating || 0;
 if (!genres && d.genres) {
 genres = (d.genres||[]).slice(0,4).map(g => {
 const n = typeof g === ‘object’ ? (g.name||’’) : (typeof g === ‘string’ ? g : ‘’);
@@ -810,7 +758,7 @@ imdbId = extIds?.imdb_id || null;
 } catch {}
 }
 }
-} catch {}
+} catch(e) { console.warn(‘TMDB search fallback:’, e); }
 }
 
 if (imdbId && OMDB_KEY) {
@@ -824,22 +772,22 @@ rtRating = rtEntry?.Value || ‘’;
 
 if (!watchLink) {
 const svc = (_src?.name || ‘’).toLowerCase();
-if (svc.includes(‘netflix’))                         watchLink = `https://www.netflix.com/search?q=${encodeURIComponent(fullTitle)}`;
+if      (svc.includes(‘netflix’))                       watchLink = `https://www.netflix.com/search?q=${encodeURIComponent(fullTitle)}`;
 else if (svc.includes(‘prime’)||svc.includes(‘amazon’)) watchLink = `https://www.amazon.nl/s?k=${encodeURIComponent(fullTitle)}`;
-else if (svc.includes(‘disney’))                     watchLink = `https://www.disneyplus.com/search/${encodeURIComponent(fullTitle)}`;
-else if (svc.includes(‘apple’))                      watchLink = `https://tv.apple.com/`;
-else if (svc.includes(‘max’)||svc.includes(‘hbo’))   watchLink = `https://www.max.com/`;
-else if (svc.includes(‘sky’))                        watchLink = `https://www.skyshowtime.com/`;
-else if (svc.includes(‘videoland’))                  watchLink = `https://www.videoland.com/`;
-else if (svc.includes(‘path’))                       watchLink = `https://www.pathe-thuis.nl/`;
-else if (svc.includes(‘npo’))                        watchLink = `https://npo.nl/`;
-else if (svc.includes(‘paramount’))                  watchLink = `https://www.paramountplus.com/nl/`;
-else if (svc.includes(‘discovery’))                  watchLink = `https://www.discoveryplus.com/nl/`;
+else if (svc.includes(‘disney’))                        watchLink = `https://www.disneyplus.com/search/${encodeURIComponent(fullTitle)}`;
+else if (svc.includes(‘apple’))                         watchLink = `https://tv.apple.com/`;
+else if (svc.includes(‘max’)||svc.includes(‘hbo’))      watchLink = `https://www.max.com/`;
+else if (svc.includes(‘sky’))                           watchLink = `https://www.skyshowtime.com/`;
+else if (svc.includes(‘videoland’))                     watchLink = `https://www.videoland.com/`;
+else if (svc.includes(‘path’))                          watchLink = `https://www.pathe-thuis.nl/`;
+else if (svc.includes(‘npo’))                           watchLink = `https://npo.nl/`;
+else if (svc.includes(‘paramount’))                     watchLink = `https://www.paramountplus.com/nl/`;
+else if (svc.includes(‘discovery’))                     watchLink = `https://www.discoveryplus.com/nl/`;
 }
 
 const oBadge = _originType === ‘original’
-? ‘<div class="origin-badge original">Originele content</div>’
-: ‘<div class="origin-badge licensed">Gelicenseerde content</div>’;
+? ‘<div class="origin-badge original" style="display:inline-block;margin-top:4px">Originele content</div>’
+: ‘<div class="origin-badge licensed" style="display:inline-block;margin-top:4px">Gelicenseerde content</div>’;
 
 const metaParts = [_type === ‘movie’ ? ‘Film’ : ‘Serie’];
 if (year)       metaParts.push(year);
@@ -848,18 +796,29 @@ if (_type === ‘tv’ && seasonInfo) metaParts.push(seasonInfo);
 
 si.innerHTML = `<div class="sp">${posterUrl ?`<img src="${posterUrl}" alt="">` : ''}</div> <div class="sinf"> <div class="ssvc" style="color:${color}">${svcName}</div> <div class="stitle">${fullTitle}</div> <div class="smeta">${metaParts.join(' · ')}</div> <div class="stags">${genres}</div> ${oBadge} </div>`;
 
-sd.textContent = rawOverview || ‘Geen beschrijving beschikbaar.’;
+const nlOverview = rawOverview || ‘Geen beschrijving beschikbaar.’;
+sd.textContent = nlOverview;
 if (rawOverview && /^[A-Za-z\s]{20,}/.test(rawOverview.slice(0, 60))) {
 translateToNL(rawOverview).then(txt => {
 if (currentModalItem === item && txt && txt !== rawOverview) sd.textContent = txt;
 }).catch(() => {});
 }
 
+const ratingChips = [];
 const imdbUrl = imdbId
 ? `https://www.imdb.com/title/${imdbId}/`
 : `https://www.imdb.com/find/?q=${encodeURIComponent(fullTitle)}&s=tt`;
+ratingChips.push(`<a class="rating-chip imdb" href="${imdbUrl}" target="_blank" rel="noopener"> <span class="chip-logo">IMDb</span>${imdbRating ? imdbRating + '/10' : 'Bekijk op IMDb'} </a>`);
 
-ratingsRow.innerHTML = ` <a class="rating-chip imdb" href="${imdbUrl}" target="_blank" rel="noopener"> <span class="chip-logo">IMDb</span>${imdbRating ? imdbRating + '/10' : 'Bekijk op IMDb'} </a> <a class="rating-chip rt" href="https://www.rottentomatoes.com/search?search=${encodeURIComponent(fullTitle)}" target="_blank" rel="noopener"> <span class="chip-logo">${!rtRating ? '🍅' : parseInt(rtRating) >= 60 ? '🍅' : '🤢'} RT</span>${rtRating || 'Bekijk op RT'} </a>`;
+const rtUrl = `https://www.rottentomatoes.com/search?search=${encodeURIComponent(fullTitle)}`;
+const rtEmoji = (() => {
+if (!rtRating) return ‘🍅’;
+const pct = parseInt(rtRating);
+return pct >= 60 ? ‘🍅’ : ‘🤢’;
+})();
+ratingChips.push(`<a class="rating-chip rt" href="${rtUrl}" target="_blank" rel="noopener"> <span class="chip-logo">${rtEmoji} RT</span>${rtRating || 'Bekijk op RT'} </a>`);
+
+ratingsRow.innerHTML = ratingChips.join(’’);
 ratingsRow.style.display = ‘flex’;
 
 if (watchLink) {
@@ -868,8 +827,13 @@ wb.style.display = ‘flex’;
 const wbLogo = document.getElementById(‘wbLogo’);
 const wbLabel = document.getElementById(‘wbLabel’);
 const provLogo = item._src?.logo_100px || null;
-if (provLogo && wbLogo) { wbLogo.src = provLogo; wbLogo.style.display = ‘block’; }
-else if (wbLogo) wbLogo.style.display = ‘none’;
+if (provLogo && wbLogo) {
+wbLogo.src = provLogo;
+wbLogo.alt = svcName;
+wbLogo.style.display = ‘block’;
+} else if (wbLogo) {
+wbLogo.style.display = ‘none’;
+}
 if (wbLabel) wbLabel.textContent = `Kijken op ${svcName}`;
 }
 }
@@ -882,10 +846,133 @@ currentModalItem = null;
 }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ── Live Sport ────────────────────────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── TOP 10 ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+let top10Period = ‘day’;
+let top10Category = ‘all’;
+let top10Cache = {};
 
+async function fetchTop10(period, category) {
+const cKey = `top10_${period}_${category}`;
+if (top10Cache[cKey]) return top10Cache[cKey];
+const endpoint = category === ‘all’
+? `/trending/all/${period}`
+: `/trending/${category}/${period}`;
+try {
+const data = await tmdb(endpoint, { language: ‘nl-NL’, region: ‘NL’ });
+const results = (data.results || []).slice(0, 10);
+top10Cache[cKey] = results;
+return results;
+} catch(e) {
+console.warn(‘Top10 fetch error:’, e);
+return [];
+}
+}
+
+async function renderTop10() {
+const main = document.getElementById(‘main’);
+main.innerHTML = ‘’;
+
+const sec = document.createElement(‘section’);
+sec.className = ‘top10-section’;
+
+const periodLabel = top10Period === ‘day’ ? ‘van vandaag’ : ‘van deze week’;
+const updateTime = new Date().toLocaleTimeString(‘nl-NL’, { hour:‘2-digit’, minute:‘2-digit’ });
+
+sec.innerHTML = ` <div class="top10-header"> <div class="top10-title">Top 10 trending ${periodLabel}</div> </div> <div class="top10-sub">Meest bekeken content op streaming wereldwijd</div> <div class="top10-tab-row"> <button class="top10-tab${top10Period==='day'?' active':''}"    onclick="switchTop10Period('day')">Vandaag</button> <button class="top10-tab${top10Period==='week'?' active':''}"   onclick="switchTop10Period('week')">Deze week</button> <button class="top10-tab${top10Category==='all'?' active':''}"  onclick="switchTop10Cat('all')">Alles</button> <button class="top10-tab${top10Category==='movie'?' active':''}" onclick="switchTop10Cat('movie')">Films</button> <button class="top10-tab${top10Category==='tv'?' active':''}"   onclick="switchTop10Cat('tv')">Series</button> </div> <div id="top10List" class="top10-list"> <div class="top10-loading"><div class="spinner" style="margin:0 auto 8px"></div>Laden…</div> </div> <div class="top10-updated">Bijgewerkt om ${updateTime}</div>`;
+
+main.appendChild(sec);
+
+const items = await fetchTop10(top10Period, top10Category);
+const listEl = document.getElementById(‘top10List’);
+if (!listEl) return;
+
+if (!items.length) {
+listEl.innerHTML = ‘<div class="top10-loading">Geen data beschikbaar.</div>’;
+return;
+}
+
+listEl.innerHTML = items.map((item, idx) => {
+const rank = idx + 1;
+const isTV = item.media_type === ‘tv’ || (!item.title && item.name);
+const title = item.title || item.name || item.original_title || item.original_name || ‘?’;
+const poster = item.poster_path ? `${TMDB_IMG}${item.poster_path}` : ‘’;
+const year = (item.release_date || item.first_air_date || ‘’).slice(0, 4);
+const score = item.vote_average ? Number(item.vote_average).toFixed(1) : ‘’;
+const typeLabel = isTV ? ‘Serie’ : ‘Film’;
+const rankCls = rank <= 3 ? `rank-${rank}` : ‘’;
+const safeTitle = title.replace(/’/g,”'”);
+const tmdbId = item.id;
+const mediaType = item.media_type || (isTV ? ‘tv’ : ‘movie’);
+
+```
+return `
+  <div class="top10-item" onclick="openTop10Modal(${tmdbId},'${mediaType}','${safeTitle}')">
+    <div class="top10-rank ${rankCls}">${rank}</div>
+    <div class="top10-poster">
+      ${poster ? `<img src="${poster}" alt="${safeTitle}" loading="lazy">` : ''}
+    </div>
+    <div class="top10-info">
+      <div class="top10-name">${title}<span class="top10-type-badge">${typeLabel}</span></div>
+      <div class="top10-meta">${year}${score ? ` · Trending #${rank}` : ''}</div>
+    </div>
+    ${score ? `<div class="top10-score">★ ${score}</div>` : ''}
+  </div>`;
+```
+
+}).join(’’);
+
+// Async cinema check
+items.forEach(async (item, idx) => {
+if (item.media_type === ‘tv’ || (!item.title && item.name)) return;
+try {
+const pd = await tmdb(`/movie/${item.id}/watch/providers`);
+const nlFlat = pd?.results?.NL?.flatrate || [];
+if (!nlFlat.length) {
+const allRows = document.querySelectorAll(’.top10-item’);
+const row = allRows[idx];
+if (row) {
+const badge = row.querySelector(’.top10-type-badge’);
+if (badge) {
+badge.textContent = ‘Film · Bioscoop’;
+badge.style.cssText = ‘background:rgba(255,107,0,0.15);color:#ff6b2b;border-color:rgba(255,107,0,0.4)’;
+}
+}
+}
+} catch {}
+});
+}
+
+function switchTop10Period(p) { top10Period = p; renderTop10(); }
+function switchTop10Cat(c)    { top10Category = c; renderTop10(); }
+
+async function openTop10Modal(tmdbId, mediaType, fallbackTitle) {
+const existing = allItems.find(i => String(i.tmdb_id) === String(tmdbId));
+if (existing) { openModal(existing.id); return; }
+
+const fakeItem = {
+id: `top10-${tmdbId}`,
+title: fallbackTitle,
+img: null,
+_type: mediaType === ‘tv’ ? ‘tv’ : ‘movie’,
+_date: ‘’,
+_src: { name: ‘Streaming’ },
+_style: { color: ‘#40e86a’, text: ‘#fff’ },
+_key: ‘streaming’,
+_originType: ‘licensed’,
+_source: ‘tmdb’,
+tmdb_id: tmdbId,
+overview: ‘’,
+user_rating: 0,
+};
+allItems.push(fakeItem);
+openModal(`top10-${tmdbId}`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── LIVE SPORT ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 const FD_KEY  = ‘a5121338cb264baaa294099596feaf92’;
 const FD_BASE = ‘https://api.football-data.org/v4’;
 
@@ -908,10 +995,11 @@ const SPORT_STREAMERS = {
 ‘Discovery+’:    { color: ‘#0036A0’, bg: ‘rgba(0,54,160,0.85)’ },
 ‘Netflix’:       { color: ‘#E50914’, bg: ‘rgba(229,9,20,0.85)’ },
 ‘Prime Video’:   { color: ‘#00A8E0’, bg: ‘rgba(0,168,224,0.85)’ },
+‘Ziggo/Viaplay’: { color: ‘#a065e0’, bg: ‘rgba(100,60,180,0.85)’ },
 };
 
-let sportFilter = ‘today’, sportCache = null;
-let sportFetchErrors = [];
+let sportFilter = ‘today’;
+let sportCache  = null;
 
 const CORS_PROXIES = [
 u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
@@ -922,216 +1010,245 @@ async function fd(path, params = {}) {
 const url = new URL(FD_BASE + path);
 Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 const rawUrl = url.toString();
-const cKey = ‘fd4_’ + rawUrl;
-const cached = scGet(cKey); if (cached) return cached;
+const cKey   = ‘fd4_’ + rawUrl;
+const cached = scGet(cKey);
+if (cached) return cached;
+
 let lastErr;
 for (const proxyFn of CORS_PROXIES) {
 try {
-const r = await fetch(proxyFn(rawUrl), { headers: { ‘X-Auth-Token’: FD_KEY, ‘Accept’: ‘application/json’ } });
+const proxyUrl = proxyFn(rawUrl);
+const r = await fetch(proxyUrl, {
+headers: { ‘X-Auth-Token’: FD_KEY, ‘Accept’: ‘application/json’ },
+});
 if (!r.ok) throw new Error(`HTTP ${r.status}`);
-const data = JSON.parse(await r.text());
-scSet(cKey, data); return data;
-} catch(e) { lastErr = e; }
+const text = await r.text();
+const data = JSON.parse(text);
+scSet(cKey, data);
+return data;
+} catch(e) {
+lastErr = e;
+console.warn(`fd proxy failed (${path}):`, e.message);
+}
 }
 throw new Error(`football-data niet bereikbaar: ${lastErr?.message}`);
 }
 
+let sportFetchErrors = [];
+
 async function fetchSportEvents() {
 if (sportCache) return sportCache;
-const events = [], seenIds = new Set(), now = new Date();
+
+const events   = [];
+const seenIds  = new Set();
+const now      = new Date();
 sportFetchErrors = [];
+
 const dateFrom = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
 const dateTo   = new Date(now.getTime() + 45 * 86400000).toISOString().slice(0, 10);
 
-function addEvent(ev) { if (!seenIds.has(ev.id)) { seenIds.add(ev.id); events.push(ev); } }
+function addEvent(ev) {
+if (seenIds.has(ev.id)) return;
+seenIds.add(ev.id);
+events.push(ev);
+}
 
-const footballFetches = FOOTBALL_COMPS.map(async comp => {
+const footballFetches = FOOTBALL_COMPS.map(async (comp) => {
 try {
 const data = await fd(`/competitions/${comp.code}/matches`, { dateFrom, dateTo });
-(data.matches || []).forEach(m => {
+const matches = data.matches || [];
+matches.forEach(m => {
 if (!m.utcDate) return;
-if ([‘FINISHED’,‘AWARDED’,‘CANCELLED’,‘POSTPONED’,‘SUSPENDED’].includes(m.status)) return;
+if ([‘FINISHED’, ‘AWARDED’, ‘CANCELLED’, ‘POSTPONED’, ‘SUSPENDED’].includes(m.status)) return;
 const matchDate = new Date(m.utcDate);
 if (isNaN(matchDate.getTime())) return;
 const home = m.homeTeam?.shortName || m.homeTeam?.name || ‘?’;
 const away = m.awayTeam?.shortName || m.awayTeam?.name || ‘?’;
 let streamer = comp.streamer;
-if (comp.code === ‘PL’ && comp.plStreamer && PL_PRIME_MATCHDAYS.has(m.matchday)) streamer = comp.plStreamer;
+if (comp.code === ‘PL’ && comp.plStreamer && PL_PRIME_MATCHDAYS.has(m.matchday)) {
+streamer = comp.plStreamer;
+}
+const isLive = [‘IN_PLAY’, ‘PAUSED’, ‘LIVE’].includes(m.status);
 addEvent({
 id: `fd-${m.id}`, title: `${home} – ${away}`, subtitle: comp.name,
-sport: ‘Voetbal’, icon: ‘⚽’, streamer, date: matchDate, venue: m.venue || ‘’,
-isLive: [‘IN_PLAY’,‘PAUSED’,‘LIVE’].includes(m.status),
+sport: ‘Voetbal’, icon: ‘⚽’, streamer, date: matchDate,
+venue: m.venue || ‘’, isLive,
 });
 });
-} catch(e) { sportFetchErrors.push(`${comp.name}: ${e.message}`); }
+} catch(e) {
+sportFetchErrors.push(`${comp.name}: ${e.message}`);
+}
 });
 
 const f1Fetch = async () => {
 const cKey = ‘jolpica_f1_2025’;
 let data = scGet(cKey);
 if (!data) {
-try { const r = await fetch(‘https://api.jolpi.ca/ergast/f1/2025/’); if (r.ok) { data = await r.json(); scSet(cKey, data); } } catch {}
-if (!data) { try { const r = await fetch(‘https://ergast.com/api/f1/2025.json’); if (r.ok) { data = await r.json(); scSet(cKey, data); } } catch {} }
+try {
+const r = await fetch(‘https://api.jolpi.ca/ergast/f1/2025/’);
+if (r.ok) { data = await r.json(); scSet(cKey, data); }
+} catch {}
+if (!data) {
+try {
+const r = await fetch(‘https://ergast.com/api/f1/2025.json’);
+if (r.ok) { data = await r.json(); scSet(cKey, data); }
+} catch {}
 }
-(data?.MRData?.RaceTable?.Races || []).forEach(race => {
+}
+const races = data?.MRData?.RaceTable?.Races || [];
+races.forEach(race => {
 const raceDate = new Date(race.date + ‘T’ + (race.time || ‘13:00:00’));
 if (raceDate < new Date(now.getTime() - 3600000)) return;
 if (raceDate > new Date(now.getTime() + 45 * 86400000)) return;
-addEvent({ id:`f1-race-${race.season}-${race.round}`, title:race.raceName, subtitle:`Formule 1 · ${race.Circuit?.circuitName||''}`, sport:‘Formule 1’, icon:‘🏎️’, streamer:‘Viaplay’, date:raceDate, venue:`${race.Circuit?.Location?.locality||''}, ${race.Circuit?.Location?.country||''}`, isLive:false });
+addEvent({
+id: `f1-race-${race.season}-${race.round}`, title: race.raceName,
+subtitle: `Formule 1 · ${race.Circuit?.circuitName || ''}`,
+sport: ‘Formule 1’, icon: ‘🏎️’, streamer: ‘Viaplay’, date: raceDate,
+venue: `${race.Circuit?.Location?.locality || ''}, ${race.Circuit?.Location?.country || ''}`, isLive: false,
+});
 if (race.Qualifying?.date) {
-const qDate = new Date(race.Qualifying.date+‘T’+(race.Qualifying.time||‘15:00:00’));
-if (qDate >= new Date(now.getTime()-3600000)) addEvent({ id:`f1-quali-${race.season}-${race.round}`, title:`Kwalificatie – ${race.raceName}`, subtitle:`Formule 1 · ${race.Circuit?.circuitName||''}`, sport:‘Formule 1’, icon:‘🏎️’, streamer:‘Viaplay’, date:qDate, venue:’’, isLive:false });
+const qDate = new Date(race.Qualifying.date + ‘T’ + (race.Qualifying.time || ‘15:00:00’));
+if (qDate >= new Date(now.getTime() - 3600000) && qDate <= new Date(now.getTime() + 45 * 86400000)) {
+addEvent({
+id: `f1-quali-${race.season}-${race.round}`, title: `Kwalificatie – ${race.raceName}`,
+subtitle: `Formule 1 · ${race.Circuit?.circuitName || ''}`,
+sport: ‘Formule 1’, icon: ‘🏎️’, streamer: ‘Viaplay’, date: qDate,
+venue: `${race.Circuit?.Location?.locality || ''}, ${race.Circuit?.Location?.country || ''}`, isLive: false,
+});
+}
 }
 if (race.Sprint?.date) {
-const spDate = new Date(race.Sprint.date+‘T’+(race.Sprint.time||‘12:00:00’));
-if (spDate >= new Date(now.getTime()-3600000)) addEvent({ id:`f1-sprint-${race.season}-${race.round}`, title:`Sprint – ${race.raceName}`, subtitle:`Formule 1`, sport:‘Formule 1’, icon:‘🏎️’, streamer:‘Viaplay’, date:spDate, venue:’’, isLive:false });
+const spDate = new Date(race.Sprint.date + ‘T’ + (race.Sprint.time || ‘12:00:00’));
+if (spDate >= new Date(now.getTime() - 3600000) && spDate <= new Date(now.getTime() + 45 * 86400000)) {
+addEvent({
+id: `f1-sprint-${race.season}-${race.round}`, title: `Sprint – ${race.raceName}`,
+subtitle: `Formule 1 · ${race.Circuit?.circuitName || ''}`,
+sport: ‘Formule 1’, icon: ‘🏎️’, streamer: ‘Viaplay’, date: spDate,
+venue: `${race.Circuit?.Location?.locality || ''}, ${race.Circuit?.Location?.country || ''}`, isLive: false,
+});
+}
 }
 });
 };
 
-function nextWeekday(targetDay, hour=2, minute=0) {
-const d = new Date(); const diff = (targetDay - d.getDay() + 7) % 7 || 7;
-d.setDate(d.getDate()+diff); d.setHours(hour,minute,0,0); return new Date(d);
+function nextWeekday(targetDay, hour = 2, minute = 0) {
+const d = new Date();
+const diff = (targetDay - d.getDay() + 7) % 7 || 7;
+d.setDate(d.getDate() + diff);
+d.setHours(hour, minute, 0, 0);
+return new Date(d);
 }
-addEvent({ id:‘wwe-raw-next’, title:‘WWE Raw’, subtitle:‘WWE · Wrestling’, sport:‘Wrestling’, icon:‘🤼’, streamer:‘Netflix’, date:nextWeekday(1,2,0), venue:‘Netflix NL – Live’, isLive:false });
-addEvent({ id:‘wwe-smackdown-next’, title:‘WWE SmackDown’, subtitle:‘WWE · Wrestling’, sport:‘Wrestling’, icon:‘🤼’, streamer:‘Netflix’, date:nextWeekday(5,2,0), venue:‘Netflix NL – Live’, isLive:false });
-addEvent({ id:‘ufc-next-event’, title:‘UFC Fight Night’, subtitle:‘UFC · MMA’, sport:‘MMA’, icon:‘🥋’, streamer:‘Discovery+’, date:nextWeekday(6,5,0), venue:‘Discovery+ NL’, isLive:false });
-addEvent({ id:‘nba-next’, title:‘NBA – Avondprogramma’, subtitle:‘NBA · Basketbal’, sport:‘Basketbal’, icon:‘🏀’, streamer:‘ESPN’, date:nextWeekday(3,1,30), venue:‘ESPN NL’, isLive:false });
+
+addEvent({ id: ‘wwe-raw-next’, title: ‘WWE Raw’, subtitle: ‘WWE · Wrestling’, sport: ‘Wrestling’, icon: ‘🤼’, streamer: ‘Netflix’, date: nextWeekday(1, 2, 0), venue: ‘Netflix NL – Live’, isLive: false });
+addEvent({ id: ‘wwe-smackdown-next’, title: ‘WWE SmackDown’, subtitle: ‘WWE · Wrestling’, sport: ‘Wrestling’, icon: ‘🤼’, streamer: ‘Netflix’, date: nextWeekday(5, 2, 0), venue: ‘Netflix NL – Live’, isLive: false });
+addEvent({ id: ‘ufc-next-event’, title: ‘UFC Fight Night’, subtitle: ‘UFC · MMA’, sport: ‘MMA’, icon: ‘🥋’, streamer: ‘Discovery+’, date: nextWeekday(6, 5, 0), venue: ‘Discovery+ NL – indicatieve datum’, isLive: false });
+addEvent({ id: ‘nba-next’, title: ‘NBA – Avondprogramma’, subtitle: ‘NBA · Basketbal’, sport: ‘Basketbal’, icon: ‘🏀’, streamer: ‘ESPN’, date: nextWeekday(3, 1, 30), venue: ‘ESPN NL – regulier seizoen’, isLive: false });
 
 await Promise.all([…footballFetches, f1Fetch()]).catch(() => {});
-events.sort((a,b) => { if (a.isLive&&!b.isLive) return -1; if (!a.isLive&&b.isLive) return 1; return a.date-b.date; });
-sportCache = events.slice(0,80);
+
+events.sort((a, b) => {
+if (a.isLive && !b.isLive) return -1;
+if (!a.isLive && b.isLive) return 1;
+return a.date - b.date;
+});
+
+sportCache = events.slice(0, 80);
 return sportCache;
 }
 
 function formatSportDate(date) {
 const now = new Date();
-const evStr = date.toISOString().slice(0,10);
-const timeStr = date.toLocaleTimeString(‘nl-NL’, { hour:‘2-digit’, minute:‘2-digit’ });
+const todayStr = now.toISOString().slice(0, 10);
+const evStr    = date.toISOString().slice(0, 10);
+const timeStr  = date.toLocaleTimeString(‘nl-NL’, { hour: ‘2-digit’, minute: ‘2-digit’ });
 const diffDays = Math.floor((date - now) / 86400000);
-if (evStr === now.toISOString().slice(0,10)) return `Vandaag ${timeStr}`;
-if (diffDays === 1) return `Morgen ${timeStr}`;
-if (diffDays >= 0 && diffDays < 7) return date.toLocaleDateString(‘nl-NL’,{weekday:‘long’})+’ ‘+timeStr;
-return date.toLocaleDateString(‘nl-NL’,{day:‘numeric’,month:‘short’})+’ ’+timeStr;
+
+if (evStr === todayStr)           return `Vandaag ${timeStr}`;
+if (diffDays === 1)               return `Morgen ${timeStr}`;
+if (diffDays >= 0 && diffDays < 7)
+return date.toLocaleDateString(‘nl-NL’, { weekday: ‘long’ }) + ’ ’ + timeStr;
+return date.toLocaleDateString(‘nl-NL’, { day: ‘numeric’, month: ‘short’ }) + ’ ’ + timeStr;
 }
 
 async function renderLiveSport() {
 const main = document.getElementById(‘main’);
 main.innerHTML = ‘’;
 
-const updateTime = new Date().toLocaleTimeString(‘nl-NL’, { hour:‘2-digit’, minute:‘2-digit’ });
+const sec = document.createElement(‘section’);
+sec.className = ‘livesport-section’;
+const updateTime = new Date().toLocaleTimeString(‘nl-NL’, { hour: ‘2-digit’, minute: ‘2-digit’ });
 
-const wrap = document.createElement(‘div’);
-wrap.className = ‘livesport-section’;
-wrap.innerHTML = ` <div class="livesport-header"> <div class="live-dot"></div> <span class="section-title">Live Sport</span> </div> <div class="section-sub">Aankomende live sportevenementen op Nederlandse streamingdiensten</div> <div class="sport-tab-row"> <button class="sport-tab${sportFilter==='all'?' active':''}"   onclick="setSportFilter('all')">Alles</button> <button class="sport-tab${sportFilter==='live'?' active':''}"  onclick="setSportFilter('live')">Nu live</button> <button class="sport-tab${sportFilter==='today'?' active':''}" onclick="setSportFilter('today')">Vandaag</button> <button class="sport-tab${sportFilter==='week'?' active':''}"  onclick="setSportFilter('week')">Deze week</button> </div> <div id="sportList" class="livesport-list"> <div style="text-align:center;padding:40px 20px"> <div class="spinner" style="margin:0 auto 10px"></div> <div style="font-size:13px;color:var(--t3)">Sportagenda laden…</div> </div> </div> <div class="livesport-updated">Bijgewerkt om ${updateTime}</div> <div class="livesport-disclaimer">Voetbalwedstrijden via football-data.org. F1 via Jolpica/Ergast. WWE & UFC zijn indicatieve data. Controleer de dienst zelf voor actuele beschikbaarheid.</div>`;
+sec.innerHTML = ` <div class="livesport-header"> <div class="livesport-live-dot"></div> <div class="livesport-title">Live Sport</div> </div> <div class="livesport-sub">Aankomende live sportevenementen op Nederlandse streamingdiensten</div> <div class="livesport-tab-row"> <button class="livesport-tab${sportFilter==='all'   ?' active':''}" onclick="setSportFilter('all')">Alles</button> <button class="livesport-tab${sportFilter==='live'  ?' active':''}" onclick="setSportFilter('live')">Nu live</button> <button class="livesport-tab${sportFilter==='today' ?' active':''}" onclick="setSportFilter('today')">Vandaag</button> <button class="livesport-tab${sportFilter==='week'  ?' active':''}" onclick="setSportFilter('week')">Deze week</button> </div> <div id="sportList" class="livesport-list"> <div class="top10-loading"> <div class="spinner" style="margin:0 auto 8px"></div>Sportagenda laden… </div> </div> <div class="livesport-updated">Bijgewerkt om ${updateTime}</div> <div class="livesport-disclaimer"> Voetbal via football-data.org · F1 via Jolpica/Ergast · WWE &amp; UFC indicatief </div>`;
 
-main.appendChild(wrap);
+main.appendChild(sec);
 
 const allEvents = await fetchSportEvents();
 renderSportList(allEvents);
+
+if (sportFetchErrors.length) {
+const listEl = document.getElementById(‘sportList’);
+if (listEl) {
+listEl.insertAdjacentHTML(‘beforeend’, ` <div style="font-size:11px;color:var(--red);margin-top:10px;padding:8px;border-radius:8px;background:rgba(255,59,48,0.06)"> ⚠️ ${sportFetchErrors.length} bron(nen) niet geladen </div>`);
+}
+}
 }
 
 function renderSportList(allEvents) {
 const listEl = document.getElementById(‘sportList’);
 if (!listEl) return;
-const now = new Date();
-const todayStr = now.toISOString().slice(0,10);
-const weekEnd = new Date(now.getTime() + 7*86400000);
+
+const now      = new Date();
+const todayStr = now.toISOString().slice(0, 10);
+const weekEnd  = new Date(now.getTime() + 7 * 86400000);
+
 let events = allEvents;
-if (sportFilter===‘live’) events = allEvents.filter(e=>e.isLive);
-if (sportFilter===‘today’) events = allEvents.filter(e=>e.isLive||e.date.toISOString().slice(0,10)===todayStr);
-if (sportFilter===‘week’) events = allEvents.filter(e=>e.isLive||(e.date>=now&&e.date<=weekEnd));
-if (!events.length) { listEl.innerHTML = `<div class="livesport-empty">${sportFilter==='live'?'Geen live evenementen op dit moment.':'Geen evenementen gevonden voor deze periode.'}</div>`; return; }
+if (sportFilter === ‘live’)  events = allEvents.filter(e => e.isLive);
+if (sportFilter === ‘today’) events = allEvents.filter(e => e.isLive || e.date.toISOString().slice(0,10) === todayStr);
+if (sportFilter === ‘week’)  events = allEvents.filter(e => e.isLive || (e.date >= now && e.date <= weekEnd));
+
+if (!events.length) {
+const msg = sportFilter === ‘live’ ? ‘Geen live evenementen op dit moment.’ : ‘Geen evenementen gevonden.’;
+listEl.innerHTML = `<div class="livesport-empty">${msg}</div>`;
+return;
+}
+
 listEl.innerHTML = events.map(ev => {
-const info = SPORT_STREAMERS[ev.streamer]||{color:’#888’,bg:‘rgba(100,100,100,0.85)’};
-const rightEl = ev.isLive ? `<div class="sport-live-badge">LIVE</div>` : `<div class="sport-time">${formatSportDate(ev.date)}</div>`;
-return `<div class="sport-event${ev.isLive?' is-live':''}"> <div class="sport-icon">${ev.icon||'🏆'}</div> <div class="sport-info"> <div class="sport-title">${ev.title}</div> <div class="sport-meta">${ev.subtitle}${ev.venue?' · '+ev.venue:''}</div> </div> <div class="sport-right"> ${rightEl} <div class="sport-streamer" style="background:${info.bg};color:#fff">${ev.streamer}</div> </div> </div>`;
+const info      = SPORT_STREAMERS[ev.streamer] || { color: ‘#888’, bg: ‘rgba(100,100,100,0.85)’ };
+const timeLabel = ev.isLive ? ‘’ : formatSportDate(ev.date);
+const rightEl   = ev.isLive
+? `<div class="sport-live-badge">LIVE</div>`
+: `<div class="sport-time">${timeLabel}</div>`;
+
+```
+return `
+  <div class="sport-event${ev.isLive ? ' is-live' : ''}">
+    <div class="sport-icon">${ev.icon || '🏆'}</div>
+    <div class="sport-info">
+      <div class="sport-title">${ev.title}</div>
+      <div class="sport-meta">${ev.subtitle}${ev.venue ? ' · ' + ev.venue : ''}</div>
+    </div>
+    <div class="sport-right">
+      ${rightEl}
+      <div class="sport-streamer" style="background:${info.bg};color:#fff">${ev.streamer}</div>
+    </div>
+  </div>`;
+```
+
 }).join(’’);
 }
 
 function setSportFilter(f) {
 sportFilter = f;
-document.querySelectorAll(’.sport-tab’).forEach(t => t.classList.toggle(‘active’, t.textContent.trim().toLowerCase() === ({all:‘alles’,live:‘nu live’,today:‘vandaag’,week:‘deze week’}[f]||’’)));
+document.querySelectorAll(’.livesport-tab’).forEach(t => {
+const labelMap = { ‘Alles’: ‘all’, ‘Nu live’: ‘live’, ‘Vandaag’: ‘today’, ‘Deze week’: ‘week’ };
+t.classList.toggle(‘active’, labelMap[t.textContent.trim()] === f);
+});
 if (sportCache) renderSportList(sportCache);
 }
 
-// ── Top 10 ────────────────────────────────────────────────────────────────────
-let top10Period = ‘day’, top10Category = ‘all’, top10Cache = {};
-
-async function fetchTop10(period, category) {
-const cKey = `top10_${period}_${category}`;
-if (top10Cache[cKey]) return top10Cache[cKey];
-const endpoint = category === ‘all’ ? `/trending/all/${period}` : `/trending/${category}/${period}`;
-try {
-const data = await tmdb(endpoint, { language:‘nl-NL’, region:‘NL’ });
-const results = (data.results||[]).slice(0,10);
-top10Cache[cKey] = results; return results;
-} catch { return []; }
-}
-
-async function renderTop10() {
-const main = document.getElementById(‘main’);
-main.innerHTML = ‘’;
-const periodLabel = top10Period === ‘day’ ? ‘van vandaag’ : ‘van deze week’;
-const updateTime = new Date().toLocaleTimeString(‘nl-NL’,{hour:‘2-digit’,minute:‘2-digit’});
-
-const wrap = document.createElement(‘div’);
-wrap.className = ‘top10-section’;
-wrap.innerHTML = ` <div class="section-header"> <div class="section-title">Top 10 trending ${periodLabel}</div> </div> <div class="section-sub">Meest bekeken content op streaming wereldwijd</div> <div class="tab-row"> <button class="tab-btn${top10Period==='day'?' active':''}"    onclick="switchTop10Period('day')">Vandaag</button> <button class="tab-btn${top10Period==='week'?' active':''}"   onclick="switchTop10Period('week')">Deze week</button> <button class="tab-btn${top10Category==='all'?' active':''}"  onclick="switchTop10Cat('all')">Alles</button> <button class="tab-btn${top10Category==='movie'?' active':''}" onclick="switchTop10Cat('movie')">Films</button> <button class="tab-btn${top10Category==='tv'?' active':''}"   onclick="switchTop10Cat('tv')">Series</button> </div> <div id="top10List" class="top10-list"> <div class="top10-loading"><div class="spinner" style="margin:0 auto 10px"></div>Laden…</div> </div> <div class="top10-updated">Bijgewerkt om ${updateTime}</div>`;
-
-main.appendChild(wrap);
-
-const items = await fetchTop10(top10Period, top10Category);
-const listEl = document.getElementById(‘top10List’);
-if (!listEl) return;
-if (!items.length) { listEl.innerHTML = ‘<div class="top10-loading">Geen data beschikbaar.</div>’; return; }
-
-listEl.innerHTML = items.map((item, idx) => {
-const rank = idx+1;
-const isTV = item.media_type===‘tv’||(!item.title&&item.name);
-const title = item.title||item.name||item.original_title||item.original_name||’?’;
-const poster = item.poster_path ? `${TMDB_IMG}${item.poster_path}` : ‘’;
-const year = (item.release_date||item.first_air_date||’’).slice(0,4);
-const score = item.vote_average ? Number(item.vote_average).toFixed(1) : ‘’;
-const rankCls = rank<=3?`rank-${rank}`:’’;
-const safeTitle = title.replace(/’/g,”'”);
-const mediaType = item.media_type||(isTV?‘tv’:‘movie’);
-return `<div class="top10-item" onclick="openTop10Modal(${item.id},'${mediaType}','${safeTitle}')" role="button"> <div class="top10-rank ${rankCls}">${rank}</div> <div class="top10-poster">${poster?`<img src="${poster}" alt="${safeTitle}" loading="lazy">`:''}</div> <div class="top10-info"> <div class="top10-name">${title}</div> <div class="top10-meta">${year}${score?` · Trending #${rank}`:''}</div> <div class="top10-badge">${isTV?'Serie':'Film'}</div> </div> ${score?`<div class="top10-score">★ ${score}</div>`:''} </div>`;
-}).join(’’);
-
-// Async: cinema detection
-items.forEach(async (item, idx) => {
-if (item.media_type===‘tv’||(!item.title&&item.name)) return;
-try {
-const pd = await tmdb(`/movie/${item.id}/watch/providers`);
-const hasSub = (pd?.results?.NL?.flatrate||[]).length > 0;
-if (!hasSub) {
-const rows = document.querySelectorAll(’.top10-item’);
-const badge = rows[idx]?.querySelector(’.top10-badge’);
-if (badge) { badge.textContent=‘Film · Bioscoop’; badge.style.cssText=‘background:rgba(255,107,0,0.15);color:#ff6b2b;border:1px solid rgba(255,107,0,0.4)’; }
-}
-} catch {}
-});
-}
-
-function switchTop10Period(p) { top10Period=p; renderTop10(); }
-function switchTop10Cat(c) { top10Category=c; renderTop10(); }
-
-async function openTop10Modal(tmdbId, mediaType, fallbackTitle) {
-const existing = allItems.find(i => String(i.tmdb_id)===String(tmdbId));
-if (existing) { openModal(existing.id); return; }
-const fakeItem = {
-id:`top10-${tmdbId}`, title:fallbackTitle, img:null,
-_type: mediaType===‘tv’?‘tv’:‘movie’, _date:’’,
-_src:{name:‘Streaming’}, _style:{color:’#0a84ff’,text:’#fff’},
-_key:‘streaming’, _originType:‘licensed’, _source:‘tmdb’,
-tmdb_id:tmdbId, overview:’’, user_rating:0,
-};
-allItems.push(fakeItem);
-openModal(`top10-${tmdbId}`);
-}
-
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── INIT ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 document.addEventListener(‘keydown’, e => {
 if (e.key === ‘Escape’) {
 const overlay = document.getElementById(‘overlay’);
@@ -1139,61 +1256,39 @@ if (overlay.classList.contains(‘open’)) {
 overlay.classList.remove(‘open’);
 document.body.style.overflow = ‘’;
 currentModalItem = null;
-} else if (searchMode) {
-toggleSearch();
 }
 }
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
-// Apply saved theme
-const savedTheme = localStorage.getItem(‘streamgids_theme’) || ‘dark’;
-applyTheme(savedTheme);
-
-const loadingText = document.querySelector(’.loading-text’);
-const loadSub = document.getElementById(‘loadSub’);
-
-// Helper to timeout an entire phase
-const withTimeout = (promise, ms, fallback) =>
-Promise.race([promise, new Promise(res => setTimeout(() => res(fallback), ms))]);
-
 try {
-if (loadingText) loadingText.textContent = ‘Verbinden…’;
-if (loadSub) loadSub.textContent = ‘TMDB & Watchmode ophalen’;
+const loading = document.querySelector(’.loading-text’);
+const loadSub = document.getElementById(‘loadSub’);
+loading.textContent = ‘Streamingdiensten ophalen…’;
+loadSub.textContent = ‘Watchmode + TMDB Nederland’;
 
 ```
-// Phase 1 – sources/providers (max 10s total)
-await withTimeout(Promise.all([
-  fetchWMSources().catch(() => {}),
-  fetchTMDBProviders().catch(() => {}),
-]), 10000, null);
+await Promise.all([
+  fetchWMSources().catch(e => console.warn('WM sources:', e)),
+  fetchTMDBProviders().catch(e => console.warn('TMDB providers:', e)),
+]);
 
-if (loadingText) loadingText.textContent = 'Releases laden…';
-if (loadSub) loadSub.textContent = 'Dit kan 15–30 seconden duren';
+const tmdbCount = Object.keys(TMDB_NL_PROVIDERS).length;
+loading.textContent = 'Releases laden…';
+loadSub.textContent = `${wmSources.length} WM + ${tmdbCount} TMDB diensten`;
 
-// Phase 2 – releases (max 45s total; show whatever we have)
-const [wmItems, tmdbItems] = await withTimeout(
-  Promise.all([
-    fetchWMReleases().catch(e => { console.warn('WM:', e); return []; }),
-    fetchTMDBReleases().catch(e => { console.warn('TMDB:', e); return []; }),
-  ]),
-  45000,
-  [[], []]
-);
+const [wmItems, tmdbItems] = await Promise.all([
+  fetchWMReleases().catch(e => { console.warn('WM releases:', e); return []; }),
+  fetchTMDBReleases().catch(e => { console.warn('TMDB releases:', e); return []; }),
+]);
 
-if (loadSub) loadSub.textContent = '';
-allItems = mergeItems(
-  Array.isArray(wmItems) ? wmItems : [],
-  Array.isArray(tmdbItems) ? tmdbItems : []
-);
+loadSub.textContent = '';
+allItems = mergeItems(wmItems, tmdbItems);
 
-if (!allItems.length) throw new Error('Geen releases gevonden. Controleer je verbinding en probeer opnieuw.');
-
-activeDayIso = todayISO();
-buildSvcStrip();
-buildDateStrip();
-renderDayContent();
+if (!allItems.length) throw new Error('Geen releases gevonden voor Nederland.');
+buildSvcBar();
+buildDateTabs();
+renderMain();
 enrichMissingPosters();
 ```
 
@@ -1202,5 +1297,4 @@ console.error(e);
 document.getElementById(‘main’).innerHTML = ` <div class="error-screen"> <div class="error-icon">⚠️</div> <div class="error-title">Kon releases niet laden</div> <div class="error-msg">${e.message || 'Controleer je internetverbinding.'}</div> <button class="retry-btn" onclick="location.reload()">Opnieuw proberen</button> </div>`;
 }
 }
-
 init();
