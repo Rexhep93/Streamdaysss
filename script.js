@@ -21,6 +21,7 @@
    │  dienst = netflix, disney+, prime video, max, etc.          │
    │  type = movie of tv                                         │
    └──────────────────────────────────────────────────────────────┘ */
+
 var GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSoYyeD3v2ElTcXt5I9IlPOHYBc8GwpRW_N06WFtgjUd20dIKEcEte7Vcdfik_kvfbDgs4xoS5wJU-c/pub?gid=0&single=true&output=csv';  // <-- PLAK HIER JE GOOGLE SHEETS CSV URL
 
 var WM_KEY     = 'eLLuTN9mYhAAWBNl1P3XOGgRKFA1toAVWhOiYX3m';
