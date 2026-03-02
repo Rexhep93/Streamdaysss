@@ -341,8 +341,8 @@ body {
   font-weight: 700;
   padding: 3px 8px;
   border-radius: var(--radius);
-  background: var(--green);
-  color: #000;
+  background: rgba(64,232,106,0.12); 
+  color: var(--green);
   margin-top: 3px;
   letter-spacing: 0.01em;
 }
