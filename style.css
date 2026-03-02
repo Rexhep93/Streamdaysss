@@ -590,10 +590,14 @@ body {
 .t10-meta { font-size: 13px; color: var(--t3); }
 .t10-streamer {
   display: inline-block;
-  font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: var(--radius);
-  background: var(--green); color: #000;
-  margin-left: 6px; vertical-align: middle;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  /* background: rgba(64,232,106,0.12); */
+  color: var(--green);
+  margin-left: 6px;
+  vertical-align: middle;
 }
 .t10-score { font-size: 14px; font-weight: 700; color: var(--green); flex-shrink: 0; }
 .t10-badge { font-size: 11px; padding: 2px 7px; border-radius: var(--radius); background: var(--brd2); border: 1px solid var(--brd); color: var(--t3); margin-left: 6px; }
