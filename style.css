@@ -28,7 +28,7 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
   --bg: #ffffff;
   --bg2: #f2f2f7;
-  --card: #f2f2f7;
+  --card: #ffffff;
   --card-h: #f5f5fa;
   --brd: rgba(0,0,0,0.08);
   --brd2: rgba(0,0,0,0.04);
@@ -256,7 +256,7 @@ body {
    Service Sections (FotMob league cards)
    ═══════════════════════════════════════ */
 .svc-section {
-  background: #ffffff;
+  background: var(--card);
   border: 1px solid var(--brd);
   border-radius: 14px;
   margin: 12px 12px 0;
