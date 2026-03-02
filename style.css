@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   StreamGids — FotMob-inspired
+   StreamGids
    Font: Jost | border-radius: 9px | 30% larger sizing
    ═══════════════════════════════════════════════════════════════ */
 
@@ -26,9 +26,9 @@ html[data-theme="dark"] {
 
 /* ── Light theme ── */
 html[data-theme="light"] {
-  --bg: #f2f2f7;
-  --bg2: #ffffff;
-  --card: #ffffff;
+  --bg: #ffffff;
+  --bg2: #f2f2f7;
+  --card: #f2f2f7;
   --card-h: #f5f5fa;
   --brd: rgba(0,0,0,0.08);
   --brd2: rgba(0,0,0,0.04);
