@@ -531,7 +531,7 @@ var searchTimeout=null;
 function renderSearch(){
   var main=document.getElementById('main');main.innerHTML='';
   var sec=document.createElement('section');sec.className='search-section';
-  sec.innerHTML='<div class="search-input-wrap"><svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" id="searchInput" type="text" placeholder="Zoek een film of serie..." autocomplete="off" autofocus></div><div id="searchResults" class="search-results"><div class="search-hint">Typ de naam van een film of serie om te zoeken.</div></div>';
+  sec.innerHTML='<div class="search-input-wrap"><svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" id="searchInput" type="text" placeholder="Zoek een film of serie..." autocomplete="off" autofocus></div><div id="searchResults" class="search-results"><div class="search-hint">Wil je weten of een film of serie te streamen is? Zoek nu!</div></div>';
   main.appendChild(sec);
   var inp=document.getElementById('searchInput');
   if(inp){
