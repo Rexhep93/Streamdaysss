@@ -338,11 +338,11 @@ function renderMain(){
 function crowHtml(item){
   var title=(item.title||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;');var sid=String(item.id).replace(/['"\\]/g,'');var poster=imgCache[item.id]||item.img||'';var tl=item._type==='movie'?'Film':'Serie';var cls=item._type==='movie'?'film':'serie';var sn=(item._src&&item._src.name||'Streaming').replace(/Netherlands/gi,'').trim();
   var epBadge='';
-  if(item._type==='tv'&&item._epInfo&&item._epInfo.s){
-    epBadge='<div class="crow-ep-badge">Nieuwe aflevering S'+item._epInfo.s+' E'+item._epInfo.e+'</div>';
-  } else if(item._type==='tv'&&item._season){
-    epBadge='<div class="crow-ep-badge">S'+item._season+'</div>';
-  }
+if(item._type==='tv' && item._epInfo && item._epInfo.s){
+  epBadge = `<div class="crow-ep-badge">Nieuwe aflevering</div>`;
+}  else if(item._type==='tv' && item._season){
+  epBadge = `<div class="crow-ep-badge">Nieuw seizoen (S${item._season})</div>`;
+}
   return '<div class="crow" data-id="'+sid+'"><div class="crow-poster">'+(poster?'<img src="'+poster+'" alt="'+title+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=crow-fb>'+title.replace(/'/g,'').replace(/"/g,'')+'</div>\'">':'<div class="crow-fb" id="fb-'+sid+'">'+title+'</div>')+'</div><div class="crow-info"><div class="crow-title">'+title+'</div>'+epBadge+'<div class="crow-meta">'+tl+' - '+sn+'</div></div><div class="crow-badge '+cls+'">'+tl+'</div></div>';
 }
 function toggleSection(key){collapsedSections[key]=!collapsedSections[key];var sec=document.getElementById('svc-'+key);if(sec)sec.classList.toggle('collapsed');}
