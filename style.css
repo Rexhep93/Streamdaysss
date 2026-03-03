@@ -55,8 +55,7 @@ body {
 
 .top-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: max(env(safe-area-inset-top, 10px), 10px) 16px 0;
   background: var(--bg2);
   position: sticky;
@@ -103,15 +102,7 @@ body {
 }
 .header-icon-btn:active { transform: scale(0.92); }
 
-.slogan-bar {
-  background: var(--bg2);
-  padding: 2px 16px 8px;   /* was: 0 16px 6px */
-  position: sticky;
-  top: 44px;               /* was: top: 46px — nu exact onder de header */
-  z-index: 15;
-}
-
-.slogan { font-size: 13px; color: var(--t3); letter-spacing: 0.01em; }
+.slogan { font-size: 13px; color: var(--t3); letter-spacing: 0.01em; padding: 1px 0 6px; margin-top: -2px; }
 
 .date-tabs {
   display: flex;
@@ -121,7 +112,7 @@ body {
   border-bottom: 1px solid var(--brd);
   padding: 0 4px;
   position: sticky;
-  top: 66px;
+  top: 58px;
   z-index: 14;
   -webkit-overflow-scrolling: touch;
 }
@@ -171,25 +162,26 @@ body {
   display: flex;
   overflow-x: auto;
   gap: 8px;
-  padding: 6px 14px;
+  padding: 8px 14px;
   background: var(--bg);
   -webkit-overflow-scrolling: touch;
   align-items: center;
   position: relative;
-  flex-wrap: nowrap;
   z-index: 13;
+  flex-wrap: nowrap;
 }
 .filter-bar::-webkit-scrollbar { display: none; }
-
-#filterChips {
+.filter-bar #filterChips {
   display: flex;
-  flex-wrap: nowrap;
   gap: 8px;
+  flex-wrap: nowrap;
   align-items: center;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
 }
-#filterChips::-webkit-scrollbar { display: none; }
-
+.filter-bar #filterChips::-webkit-scrollbar { display: none; }
 .filter-icon {
   flex-shrink: 0;
   display: flex;
@@ -223,6 +215,7 @@ body {
   color: #000;
   font-weight: 700;
 }
+
 .sc {
   flex: 0 0 auto;
   display: flex;
@@ -240,6 +233,7 @@ body {
   font-family: var(--font);
   transition: all 0.15s;
 }
+
 .sc:active { transform: scale(0.96); }
 .sc img { width: 16px; height: 16px; border-radius: 4px; object-fit: cover; }
 .sc .dot { width: 10px; height: 10px; border-radius: 9px; flex-shrink: 0; }
