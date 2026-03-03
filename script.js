@@ -178,55 +178,187 @@ function tmdbPages(path,params,maxP){
   maxP=maxP||3;return tmdb(path,Object.assign({},params,{page:1})).catch(function(){return{results:[],total_pages:0};}).then(function(first){var all=(first.results||[]).slice();var total=Math.min(first.total_pages||1,maxP);if(total<=1)return all;var ps=[];for(var i=2;i<=total;i++){(function(pg){ps.push(tmdb(path,Object.assign({},params,{page:pg})).catch(function(){return{results:[]};}));})(i);}return Promise.all(ps).then(function(rest){rest.forEach(function(r){all=all.concat(r.results||[]);});return all;});});
 }
 function fetchTMDBReleases(){
-  var items=[];var entries=Object.keys(TMDB_NL_PROVIDERS).map(function(id){return[id,TMDB_NL_PROVIDERS[id]];});if(!entries.length)return Promise.resolve([]);
-  function makeItem(m,prov,id,type,overrideDate,epInfo){var date=overrideDate||(type==='movie'?(m.release_date||''):(m.first_air_date||''));if(!date||!m.id)return null;return{id:'tmdb-'+m.id+'-'+id+(overrideDate?'-'+overrideDate:''),title:m.title||m.name||m.original_title||m.original_name||'',img:m.poster_path?TMDB_IMG+m.poster_path:null,_type:type,_date:date,_src:{name:prov.name,logo_100px:prov.logo},_style:{color:prov.color,text:prov.text},_key:providerKey(prov.name),_originType:detectOrigin(prov.name),_source:'tmdb',_providerId:Number(id),tmdb_id:m.id,user_rating:m.vote_average||0,overview:m.overview||'',_epInfo:epInfo||null,_genres:m.genre_ids||[]};}
-  var sub=document.getElementById('loadSub');if(sub)sub.textContent='TMDB: actuele titels ophalen...';
-  return Promise.all([tmdbPages('/movie/now_playing',{language:'nl-NL',region:'NL'},5),tmdbPages('/tv/on_the_air',{language:'nl-NL'},5)]).then(function(res){
+  var items=[];
+  var entries=Object.keys(TMDB_NL_PROVIDERS).map(function(id){
+    return [id,TMDB_NL_PROVIDERS[id]];
+  });
+  if(!entries.length) return Promise.resolve([]);
+
+  function makeItem(m,prov,id,type,overrideDate,epInfo){
+    var date=overrideDate||(type==='movie'?(m.release_date||''):(m.first_air_date||''));
+    if(!date||!m.id)return null;
+    return{
+      id:'tmdb-'+m.id+'-'+id+(overrideDate?'-'+overrideDate:''),
+      title:m.title||m.name||m.original_title||m.original_name||'',
+      img:m.poster_path?TMDB_IMG+m.poster_path:null,
+      _type:type,
+      _date:date,
+      _src:{name:prov.name,logo_100px:prov.logo},
+      _style:{color:prov.color,text:prov.text},
+      _key:providerKey(prov.name),
+      _originType:detectOrigin(prov.name),
+      _source:'tmdb',
+      _providerId:Number(id),
+      tmdb_id:m.id,
+      user_rating:m.vote_average||0,
+      overview:m.overview||'',
+      _epInfo:epInfo||null,
+      _genres:m.genre_ids||[]
+    };
+  }
+
+  var sub=document.getElementById('loadSub');
+  if(sub)sub.textContent='TMDB: actuele titels ophalen...';
+
+  return Promise.all([
+    tmdbPages('/movie/now_playing',{language:'nl-NL',region:'NL'},5),
+    tmdbPages('/tv/on_the_air',{language:'nl-NL'},5)
+  ])
+  .then(function(res){
+
     var tvShows=res[1].slice(0,50);
     var epDateMap={};
     var epBatch=Promise.resolve();
-    for(var ei=0;ei<tvShows.length;ei+=10){(function(batch){
-      epBatch=epBatch.then(function(){return Promise.all(batch.map(function(show){
-        return tmdb('/tv/'+show.id,{language:'nl-NL'}).then(function(detail){
-          var candidates=[];
-          if(detail.next_episode_to_air){
-            candidates.push({date:detail.next_episode_to_air.air_date,s:detail.next_episode_to_air.season_number,e:detail.next_episode_to_air.episode_number,name:detail.next_episode_to_air.name||''});
-          }
-          if(detail.last_episode_to_air){
-            candidates.push({date:detail.last_episode_to_air.air_date,s:detail.last_episode_to_air.season_number,e:detail.last_episode_to_air.episode_number,name:detail.last_episode_to_air.name||''});
-          }
-          var today=todayISO();
-          var best=null;
-          candidates.forEach(function(c){if(!c.date)return;if(!best)best=c;else if(Math.abs(new Date(c.date)-new Date(today))<Math.abs(new Date(best.date)-new Date(today)))best=c;});
-          if(best){
-            /* Also fetch season detail to know total episode count */
-            epDateMap[show.id]=best;
-            epDateMap[show.id].totalEpisodes=detail.number_of_episodes||null;
-            epDateMap[show.id].numSeasons=detail.number_of_seasons||null;
-            /* Fetch season detail for episode count of this specific season */
-            return tmdb('/tv/'+show.id+'/season/'+best.s,{language:'nl-NL'}).then(function(seasonDetail){
-              var eps=seasonDetail.episodes||[];
-              epDateMap[show.id].seasonEpisodeCount=eps.length;
-              /* Count how many episodes have aired (air_date <= today) */
-              var aired=eps.filter(function(ep){return ep.air_date&&ep.air_date<=today;}).length;
-              epDateMap[show.id].airedEpisodes=aired;
-              /* Check if all episodes air on the same date (complete season drop) */
-              var dates={};eps.forEach(function(ep){if(ep.air_date)dates[ep.air_date]=true;});
-              epDateMap[show.id].isCompleteDrop=Object.keys(dates).length<=1;
-            }).catch(function(){});
-          }
-        }).catch(function(){});
-      }));});
-    })(tvShows.slice(ei,ei+10));}
+
+    for(var ei=0;ei<tvShows.length;ei+=10){
+      (function(batch){
+        epBatch=epBatch.then(function(){
+          return Promise.all(batch.map(function(show){
+            return tmdb('/tv/'+show.id,{language:'nl-NL'})
+            .then(function(detail){
+
+              var candidates=[];
+              if(detail.next_episode_to_air){
+                candidates.push({
+                  date:detail.next_episode_to_air.air_date,
+                  s:detail.next_episode_to_air.season_number,
+                  e:detail.next_episode_to_air.episode_number,
+                  name:detail.next_episode_to_air.name||''
+                });
+              }
+              if(detail.last_episode_to_air){
+                candidates.push({
+                  date:detail.last_episode_to_air.air_date,
+                  s:detail.last_episode_to_air.season_number,
+                  e:detail.last_episode_to_air.episode_number,
+                  name:detail.last_episode_to_air.name||''
+                });
+              }
+
+              var today=todayISO();
+              var best=null;
+
+              candidates.forEach(function(c){
+                if(!c.date)return;
+                if(!best)best=c;
+                else if(Math.abs(new Date(c.date)-new Date(today))<
+                        Math.abs(new Date(best.date)-new Date(today)))best=c;
+              });
+
+              if(best){
+                epDateMap[show.id]=best;
+
+                return tmdb('/tv/'+show.id+'/season/'+best.s,{language:'nl-NL'})
+                .then(function(seasonDetail){
+                  var eps=seasonDetail.episodes||[];
+
+                  var aired=eps.filter(function(ep){
+                    return ep.air_date&&ep.air_date<=today;
+                  }).length;
+
+                  var dates={};
+                  eps.forEach(function(ep){
+                    if(ep.air_date)dates[ep.air_date]=true;
+                  });
+
+                  epDateMap[show.id].seasonEpisodeCount=eps.length;
+                  epDateMap[show.id].airedEpisodes=aired;
+                  epDateMap[show.id].isCompleteDrop=Object.keys(dates).length<=1;
+                });
+              }
+            });
+          }));
+        });
+      })(tvShows.slice(ei,ei+10));
+    }
+
     return epBatch.then(function(){
-      var checks=res[0].slice(0,50).map(function(m){return Object.assign({},m,{_isTV:false});}).concat(tvShows.map(function(t){var ep=epDateMap[t.id];return Object.assign({},t,{_isTV:true,_epDate:ep?ep.date:null,_epInfo:ep?{s:ep.s,e:ep.e,name:ep.name,seasonEpisodeCount:ep.seasonEpisodeCount||null,airedEpisodes:ep.airedEpisodes||null,isCompleteDrop:ep.isCompleteDrop||false}:null});}));
-      var bw=Promise.resolve();for(var i=0;i<checks.length;i+=10){(function(batch){bw=bw.then(function(){return Promise.all(batch.map(function(m){return tmdb('/'+(m._isTV?'tv':'movie')+'/'+m.id+'/watch/providers').then(function(pd){var flat=pd&&pd.results&&pd.results.NL&&pd.results.NL.flatrate||[];flat.forEach(function(p){var prov=TMDB_NL_PROVIDERS[p.provider_id];if(!prov)return;var epDate=m._isTV?m._epDate:null;var epInfo=m._isTV?m._epInfo:null;var it=makeItem(m,prov,p.provider_id,m._isTV?'tv':'movie',epDate,epInfo);if(it)items.push(it);});}).catch(function(){});}));});})(checks.slice(i,i+10));}
+
+      var checks=res[0]
+        .slice(0,50)
+        .map(function(m){return Object.assign({},m,{_isTV:false});})
+        .concat(
+          tvShows.map(function(t){
+            var ep=epDateMap[t.id];
+            return Object.assign({},t,{
+              _isTV:true,
+              _epDate:ep?ep.date:null,
+              _epInfo:ep?{
+                s:ep.s,
+                e:ep.e,
+                name:ep.name,
+                seasonEpisodeCount:ep.seasonEpisodeCount||null,
+                airedEpisodes:ep.airedEpisodes||null,
+                isCompleteDrop:ep.isCompleteDrop||false
+              }:null
+            });
+          })
+        );
+
+      var bw=Promise.resolve();
+
+      for(var i=0;i<checks.length;i+=10){
+        (function(batch){
+          bw=bw.then(function(){
+            return Promise.all(batch.map(function(m){
+
+              return tmdb('/'+(m._isTV?'tv':'movie')+'/'+m.id+'/watch/providers')
+              .then(function(pd){
+
+                var flat = pd && pd.results && pd.results.NL && pd.results.NL.flatrate || [];
+
+                var rentBuy = (pd && pd.results && pd.results.NL && pd.results.NL.rent || [])
+                  .concat(pd && pd.results && pd.results.NL && pd.results.NL.buy || []);
+
+                var epDate = m._isTV ? m._epDate : null;
+                var epInfo = m._isTV ? m._epInfo : null;
+
+                /* FLATRATE */
+                flat.forEach(function(p){
+                  var prov=TMDB_NL_PROVIDERS[p.provider_id];
+                  if(!prov)return;
+
+                  var it=makeItem(m,prov,p.provider_id,m._isTV?'tv':'movie',epDate,epInfo);
+                  if(it){
+                    it._monetization='flatrate';
+                    items.push(it);
+                  }
+                });
+
+                /* RENT / BUY */
+                rentBuy.forEach(function(p){
+                  var prov=TMDB_NL_PROVIDERS[p.provider_id];
+                  if(!prov)return;
+
+                  var it=makeItem(m,prov,p.provider_id,m._isTV?'tv':'movie',epDate,epInfo);
+                  if(it){
+                    it._monetization='rent';
+                    items.push(it);
+                  }
+                });
+
+              }).catch(function(){});
+            }));
+          });
+        })(checks.slice(i,i+10));
+      }
+
       return bw;
     });
-  }).then(function(){
-    var bw=Promise.resolve();for(var i=0;i<entries.length;i+=4){(function(batch){bw=bw.then(function(){if(sub)sub.textContent='TMDB: '+batch.map(function(e){return e[1].name;}).join(', ')+'...';return Promise.all(batch.map(function(e){var id=e[0],prov=e[1];var base={watch_region:'NL',with_watch_providers:id,with_watch_monetization_types:'flatrate',language:'nl-NL',sort_by:'popularity.desc'};var cutoff=dateOffset(-1095);return Promise.all([tmdbPages('/discover/movie',Object.assign({},base,{'primary_release_date.gte':cutoff}),5).catch(function(){return[];}),tmdbPages('/discover/tv',Object.assign({},base,{'first_air_date.gte':cutoff}),5).catch(function(){return[];})]).then(function(r){r[0].forEach(function(m){var it=makeItem(m,prov,id,'movie');if(it)items.push(it);});r[1].forEach(function(t){var it=makeItem(t,prov,id,'tv');if(it)items.push(it);});});})).catch(function(){});});})(entries.slice(i,i+4));}
-    return bw;
-  }).then(function(){return items;});
+  })
+  .then(function(){
+    return items;
+  });
 }
 
 /* ── Google Sheets CSV fetch ── */
@@ -443,10 +575,22 @@ function filteredItems(){
     return !!i._date;
   });
 }
-function applySubFilter(items){
-  if(!streamSubFilter)return items;
-  if(streamSubFilter==='episodes')return items.filter(function(i){return i._type==='tv'&&(i._epInfo&&i._epInfo.s||i._source==='googlesheet');});
-  if(streamSubFilter==='seasons')return items.filter(function(i){return i._type==='tv'&&(i._season||(i._epInfo&&i._epInfo.e===1));});
+
+function applySubFilter(items) {
+  if (!streamSubFilter) return items;
+  if (streamSubFilter === 'episodes') return items.filter(function(i) {
+    return i._type === 'tv' && (i._epInfo && i._epInfo.s || i._source === 'googlesheet');
+  });
+  if (streamSubFilter === 'seasons') return items.filter(function(i) {
+    return i._type === 'tv' && (i._season || (i._epInfo && i._epInfo.e === 1));
+  });
+  /* FIX 5: streaming = flatrate only, rent = rent or buy */
+  if (streamSubFilter === 'streaming') return items.filter(function(i) {
+    return i._monetization === 'flatrate' || (!i._monetization && i._type === 'movie');
+  });
+  if (streamSubFilter === 'rent') return items.filter(function(i) {
+    return i._monetization === 'rent';
+  });
   return items;
 }
 
@@ -913,7 +1057,19 @@ function renderSettings(){
   '<div class="set-row set-link" data-page="feedback"><span>App feedback</span><span class="set-arrow">&rsaquo;</span></div></div>';
   main.appendChild(sec);
   sec.querySelector('#themeToggle').addEventListener('click',function(e){var btn=e.target.closest('.set-tog');if(!btn)return;var v=btn.getAttribute('data-v');setSetting('theme',v);sec.querySelectorAll('#themeToggle .set-tog').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-v')===v);});if(v==='system'){var dk=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',dk?'dark':'light');localStorage.removeItem('streamgids_theme');}else{document.documentElement.setAttribute('data-theme',v);try{localStorage.setItem('streamgids_theme',v);}catch(e){}}});
-  sec.querySelector('#posterToggle').addEventListener('click',function(e){var btn=e.target.closest('.set-tog');if(!btn)return;var v=btn.getAttribute('data-v');setSetting('posterSize',v);posterSize=v;sec.querySelectorAll('#posterToggle .set-tog').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-v')===v);});showToast('Posterweergave: '+(v==='large'?'Groot':'Compact'));});
+  sec.querySelector('#posterToggle').addEventListener('click', function(e) {
+  var btn = e.target.closest('.set-tog');
+   if (!btn) return;
+  var v = btn.getAttribute('data-v');
+   setSetting('posterSize', v);
+  posterSize = v;
+  sec.querySelectorAll('#posterToggle .set-tog').forEach(function(b) {
+     b.classList.toggle('active', b.getAttribute('data-v') === v);
+   });
+  var appEl = document.querySelector('.app');
+  if (appEl) appEl.classList.toggle('poster-large', v === 'large');
+  showToast('Posterweergave: ' + (v === 'large' ? 'Groot' : 'Compact'));
+  });
   var nrEl=sec.querySelector('#notifRel');if(nrEl)nrEl.addEventListener('change',function(){setSetting('notif_releases',nrEl.checked?'true':'false');if(nrEl.checked&&'Notification' in window&&Notification.permission!=='granted')Notification.requestPermission();});
   var nfEl=sec.querySelector('#notifFav');if(nfEl)nfEl.addEventListener('change',function(){setSetting('notif_fav',nfEl.checked?'true':'false');});
   sec.querySelector('#setFavLink').addEventListener('click',function(){renderFavorites();});
@@ -947,6 +1103,8 @@ function renderSettingsPage(page){
 document.addEventListener('DOMContentLoaded',function(){
   console.log('[StreamGids] Init');
   loadFavorites();posterSize=getSetting('posterSize','compact');
+  var appEl = document.querySelector('.app');
+  if (appEl && posterSize === 'large') appEl.classList.add('poster-large');
   var brandLink=document.getElementById('brandLink');
   if(brandLink)brandLink.addEventListener('click',function(e){e.preventDefault();goHome();});
   document.querySelectorAll('.bnav').forEach(function(btn){btn.addEventListener('click',function(){setType(btn.getAttribute('data-f'));});});
