@@ -191,9 +191,9 @@ body {
   gap: 5px;
   padding: 6px 12px;
   border-radius: var(--radius);
-  background: #7c7c7c1c;
+  background: transparent;
   border: 1px solid var(--brd);
-  color: var(--t1);
+  color: var(--t2);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -224,9 +224,9 @@ body {
   gap: 6px;
   padding: 7px 13px;
   border-radius: var(--radius);
-  background: transparent;
+  background: #7c7c7c1c;
   border: 1px solid var(--brd);
-  color: var(--t2);
+  color: var(--t1);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
