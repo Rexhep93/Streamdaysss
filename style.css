@@ -193,9 +193,9 @@ body {
   gap: 5px;
   padding: 6px 12px;
   border-radius: var(--radius);
-  background: transparent;
+  background: #7c7c7c1c;
   border: 1px solid var(--brd);
-  color: var(--t2);
+  color: var(--t1);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -211,6 +211,14 @@ body {
   color: #000;
   font-weight: 700;
 }
+
+#filterChips {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
 .sc {
   flex: 0 0 auto;
   display: flex;
